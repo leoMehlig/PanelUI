@@ -27,7 +27,7 @@ struct Panel<Content: View, Header: View>: View {
 
         var direction: Direction? = nil
         var offset: CGSize = .zero
-        var predictedEnd: CGPoint?
+        var predictedEnd: CGSize?
 
         mutating func update(offset: CGSize, with sizeClass: UserInterfaceSizeClass?) {
             self.offset = offset
@@ -141,13 +141,8 @@ struct Panel<Content: View, Header: View>: View {
                     .ignoresSafeArea(.container, edges: sizeClass == .compact ? .bottom : []))
         .mask(clip)
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
-        .offset(y: state == .expanded
-                    ? dragState.y
-                    : proxy.size.height - headerHeight + dragState.y)
-
-        .frame(height: state == .expanded
-                ? proxy.size.height - dragState.y
-                : headerHeight - dragState.y)
+        .offset(y: (proxy.size.height - headerHeight) * (1 - self.verticalProgress(for: dragState.y, in: proxy)))
+        .frame(height: (proxy.size.height - headerHeight) * self.verticalProgress(for: dragState.y, in: proxy) + headerHeight)
     }
 
     var clip: some View {
@@ -161,16 +156,22 @@ struct Panel<Content: View, Header: View>: View {
 
     }
 
-    func progress(in proxy: GeometryProxy) -> Double {
+    func verticalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
         let height = state == .expanded
-            ? proxy.size.height - dragState.y
-            : headerHeight - dragState.y
-        let progress = Double((height - headerHeight) / (proxy.size.height - headerHeight))
-        return max(min(progress, 1), 0)
+            ? proxy.size.height - offset
+            : headerHeight - offset
+        return (height - headerHeight) / (proxy.size.height - headerHeight)
+    }
+
+    func horizontalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
+        let endWidth = position == .leading
+            ? offset
+            : proxy.size.width + offset - width
+        return (endWidth) / (proxy.size.width - width)
     }
 
     func header(in proxy: GeometryProxy) -> some View {
-        self.header(self.progress(in: proxy))
+        self.header(max(min(Double(self.verticalProgress(for: dragState.y, in: proxy)), 1), 0))
             .background(GeometryReader {
                 Color.clear
                     .preference(key: HeaderHeightKey.self, value: $0.size.height)
@@ -181,20 +182,22 @@ struct Panel<Content: View, Header: View>: View {
             .gesture(DragGesture()
                         .updating($dragState) { value, state, _ in
                             state.update(offset: value.translation, with: sizeClass)
-                            state.predictedEnd = value.predictedEndLocation
+                            state.predictedEnd = value.predictedEndTranslation
                         })
             .offset(x: -dragState.x, y: -dragState.y)
             .onChange(of: self.dragState) { [dragState] (value: DragState) in
                 if value.direction == nil,
                    let predictedEnd = dragState.predictedEnd {
                     if dragState.direction == .vertical {
-                        if predictedEnd.y < proxy.size.height / 2 {
+                        if verticalProgress(for: predictedEnd.height, in: proxy) > 0.5 {
                             self.state = .expanded
                         } else {
                             self.state = .collapsed
                         }
                     } else if dragState.direction == .horizontal {
-                        if predictedEnd.x < proxy.size.width / 2 {
+
+                        let progress = horizontalProgress(for: predictedEnd.width, in: proxy)
+                        if progress < 0.5 {
                             self.position = .leading
                         } else {
                             self.position = .trailing
