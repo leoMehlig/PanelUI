@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Aiolos
+
 
 struct ContentView: View {
     var body: some View {
