@@ -215,9 +215,9 @@ struct PresentedPanelModifier<Body: View, Header: View>: ViewModifier {
 
     @Binding var isPresented: Bool
     let header: (Double) -> Header
-    let body: Body
+    let body: () -> Body
 
-    init(isPresented: Binding<Bool>, header: @escaping (Double) -> Header, body: Body) {
+    init(isPresented: Binding<Bool>, header: @escaping (Double) -> Header, body: @escaping () -> Body) {
         self._isPresented = isPresented
         self._state = State(initialValue: isPresented.wrappedValue ? .expanded : .hidden)
         self.header = header
@@ -226,22 +226,28 @@ struct PresentedPanelModifier<Body: View, Header: View>: ViewModifier {
 
 
     func body(content: Content) -> some View {
-        content
-            .overlay(Panel(state: $state, header: header, content: { body }))
-            .onChange(of: isPresented, perform: { value in
-                if value && state == .hidden {
-                    self.state = .expanded
-                } else if !value && state != .hidden  {
-                    self.state = .hidden
-                }
-            })
-            .onChange(of: state, perform: { value in
-                if isPresented && value == .hidden {
-                    self.isPresented = false
-                } else if !isPresented && value != .hidden  {
-                    self.isPresented = true
-                }
-            })
+        Group {
+            if isPresented {
+                content
+                    .overlay(Panel(state: $state, header: header, content: body))
+            } else {
+                content
+            }
+        }
+        .onChange(of: isPresented, perform: { value in
+            if value && state == .hidden {
+                self.state = .expanded
+            } else if !value && state != .hidden  {
+                self.state = .hidden
+            }
+        })
+        .onChange(of: state, perform: { value in
+            if self.isPresented && value == .hidden {
+                self.isPresented = false
+            } else if !self.isPresented && value != .hidden  {
+                self.isPresented = true
+            }
+        })
     }
 }
 
@@ -254,8 +260,17 @@ extension View {
 
     public func panel<Content: View, Header: View>(isPresented: Binding<Bool>,
                                                    @ViewBuilder header: @escaping (Double) -> Header,
-                                                   @ViewBuilder content: () -> Content) -> some View {
-        self.modifier(PresentedPanelModifier(isPresented: isPresented, header: header, body: content()))
+                                                   @ViewBuilder content: @escaping () -> Content) -> some View {
+        self.modifier(PresentedPanelModifier(isPresented: isPresented, header: header, body: content))
+    }
+    public func panel<Item: Identifiable, Content: View, Header: View>(item: Binding<Item?>,
+                                                                       @ViewBuilder header: @escaping (Double) -> Header,
+                                                                       @ViewBuilder content: @escaping (Item) -> Content) -> some View {
+        let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
+        return self.modifier(PresentedPanelModifier(isPresented: binding,
+                                                    header: header,
+                                                    body: { content(item.wrappedValue!) }))
+
     }
 }
 
