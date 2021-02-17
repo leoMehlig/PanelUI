@@ -27,6 +27,8 @@ struct Panel<Content: View, Header: View>: View {
 
     @State private var feedback = UIImpactFeedbackGenerator()
 
+    @State private var endState: PanelState?
+
     init(isPresented: Binding<Bool>,
          state: Binding<PanelState>,
          @ViewBuilder header: @escaping (Double) -> Header,
@@ -61,10 +63,9 @@ struct Panel<Content: View, Header: View>: View {
             }
         }
         .padding(sizeClass == .regular ? [.all] : .top, 20)
-        .animation(.spring(), value: state)
+        .animation(.spring(), value: currentState)
         .animation(.spring(), value: isPresented)
         .animation(.interactiveSpring())
-        .animation(.default)
         .environment(\.panelState, $state)
         .onPreferenceChange(HeaderHeightKey.self, perform: { value in
             self.headerHeight = value
@@ -87,13 +88,12 @@ struct Panel<Content: View, Header: View>: View {
                 .accessibilityAddTraits(.isHeader)
                 .zIndex(1)
             content()
-//                .ignoresSafeArea(.container, edges: sizeClass == .compact ? [.bottom, .horizontal] : [])
                 .accessibility(hidden: state.state != .expanded)
         }
         .background(self.background)
         .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
-                    .ignoresSafeArea(.container, edges: sizeClass == .compact ? [.bottom, .horizontal] : []))
+                    .ignoresSafeArea(.container, edges: ignoredEdges))
         .mask(clip)
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
         .offset(y: (proxy.size.height - headerHeight) * (1 - self.verticalProgress(for: dragState.y, in: proxy)))
@@ -102,27 +102,13 @@ struct Panel<Content: View, Header: View>: View {
 
     var clip: some View {
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .ignoresSafeArea(.container, edges: sizeClass == .compact ? [.bottom, .horizontal] : [])
+            .ignoresSafeArea(.container, edges: ignoredEdges)
     }
 
     var background: some View {
         Color(.systemBackground)
-            .ignoresSafeArea(.container, edges: sizeClass == .compact ? [.bottom, .horizontal] : [])
+            .ignoresSafeArea(.container, edges: ignoredEdges)
 
-    }
-
-    func verticalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
-        let height = state.state == .expanded
-            ? proxy.size.height - offset
-            : headerHeight - offset
-        return (height - headerHeight) / (proxy.size.height - headerHeight)
-    }
-
-    func horizontalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
-        let endWidth = state.position == .leading
-            ? offset
-            : proxy.size.width + offset - width
-        return (endWidth) / (proxy.size.width - width)
     }
 
     func header(in proxy: GeometryProxy) -> some View {
@@ -137,35 +123,56 @@ struct Panel<Content: View, Header: View>: View {
             .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
                         .updating($dragState) { value, state, _ in
                             state.update(offset: value.translation, with: sizeClass)
-                            state.predictedEnd = value.predictedEndTranslation
-                        })
+                        }
+                        .onChanged { value in
+                            var end = self.state
+                            if dragState.direction == .vertical {
+                                if verticalProgress(for: value.predictedEndTranslation.height, in: proxy) > 0.5 {
+                                    end.state = .expanded
+                                } else {
+                                    end.state = .collapsed
+                                }
+                            } else if dragState.direction == .horizontal {
+                                if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
+                                    end.position = .leading
+                                } else {
+                                    end.position = .trailing
+                                }
+                            }
+                            self.endState = end
+                        }
+                        .onEnded { _ in
+                            if let end = self.endState {
+                                self.state = end
+                                self.endState = nil
+                            }
+                        }
+            )
             .offset(x: -dragState.x, y: -dragState.y)
-            .onChange(of: self.dragState) { [dragState] (value: DragState) in
-                if value.direction == nil,
-                   let predictedEnd = dragState.predictedEnd {
-                    if dragState.direction == .vertical {
-                        let newState: PanelState.State
-                        if verticalProgress(for: predictedEnd.height, in: proxy) > 0.5 {
-                            newState = .expanded
-                        } else {
-                            newState = .collapsed
-                        }
-                        if newState != self.state.state {
-                            self.state.state = newState
-                        }
-                    } else if dragState.direction == .horizontal {
-                        let position: PanelState.Position
-                        if horizontalProgress(for: predictedEnd.width, in: proxy) < 0.5 {
-                            position = .leading
-                        } else {
-                            position = .trailing
-                        }
-                        if position != self.state.position {
-                            self.state.position = position
-                        }
-                    }
-                }
-            }
+    }
+
+    var currentState: PanelState {
+        return dragState.direction == nil ? endState ?? self.state : self.state
+    }
+
+    func verticalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
+        let height = currentState.state == .expanded
+            ? proxy.size.height - offset
+            : headerHeight - offset
+        let progress = (height - headerHeight) / (proxy.size.height - headerHeight)
+        print(progress, self.state.state, endState, offset, dragState, proxy.size.height, headerHeight)
+        return progress
+    }
+
+    func horizontalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
+        let endWidth = currentState.position == .leading
+            ? offset
+            : proxy.size.width + offset - width
+        return (endWidth) / (proxy.size.width - width)
+    }
+
+    var ignoredEdges: Edge.Set {
+        sizeClass == .compact ? [.bottom, .horizontal] : []
     }
 }
 
@@ -190,7 +197,7 @@ public struct PanelUI_Previews: PreviewProvider {
                 }
                 .font(.headline)
                 Spacer()
-                Text("\(progress) - \(state.state.wrappedValue == .expanded ? "expanded" : "collapsed")")
+                Text("\(progress)")
             }
             .padding()
             .background(Color.green.opacity(1 - progress))
