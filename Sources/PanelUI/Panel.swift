@@ -51,9 +51,7 @@ struct Panel<Content: View, Header: View>: View {
                     HStack(spacing: 0) {
                         panel(in: proxy)
                             .frame(maxWidth: width)
-                            .offset(x: state.position == .leading
-                                        ? dragState.x
-                                        : proxy.size.width + dragState.x - width)
+                            .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
                         Spacer()
                     }
                     .transition(AnyTransition.opacity.animation(.default)
@@ -83,7 +81,10 @@ struct Panel<Content: View, Header: View>: View {
     }
 
     func panel(in proxy: GeometryProxy) -> some View {
-        VStack(spacing: 0) {
+        let progress = self.verticalProgress(for: dragState.y, in: proxy)
+        let offset = (proxy.size.height - headerHeight) * (1 - progress)
+        let height = (proxy.size.height - headerHeight) * progress + headerHeight
+        return VStack(spacing: 0) {
             header(in: proxy)
                 .accessibilityAddTraits(.isHeader)
                 .zIndex(1)
@@ -96,8 +97,8 @@ struct Panel<Content: View, Header: View>: View {
                     .ignoresSafeArea(.container, edges: ignoredEdges))
         .mask(clip)
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
-        .offset(y: (proxy.size.height - headerHeight) * (1 - self.verticalProgress(for: dragState.y, in: proxy)))
-        .frame(height: (proxy.size.height - headerHeight) * self.verticalProgress(for: dragState.y, in: proxy) + headerHeight)
+        .offset(y: offset)
+        .frame(height: max(height, 0))
     }
 
     var clip: some View {
@@ -160,7 +161,6 @@ struct Panel<Content: View, Header: View>: View {
             ? proxy.size.height - offset
             : headerHeight - offset
         let progress = (height - headerHeight) / (proxy.size.height - headerHeight)
-        print(progress, self.state.state, endState, offset, dragState, proxy.size.height, headerHeight)
         return progress
     }
 
