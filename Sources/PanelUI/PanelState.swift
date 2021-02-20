@@ -48,3 +48,14 @@ extension EnvironmentValues {
         set { self[PanelStateKey.self] = newValue }
     }
 }
+
+struct PanelProgressKey: EnvironmentKey {
+    static var defaultValue: Double = 1
+}
+
+extension EnvironmentValues {
+    public var panelProgress: Double {
+        get { self[PanelProgressKey.self] }
+        set { self[PanelProgressKey.self] = newValue }
+    }
+}

@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-struct PanelModifier<Body: View, Header: View>: ViewModifier {
+struct PanelModifier<Body: View>: ViewModifier {
 
     @Binding var isPresented: Bool
-    let header: (Double) -> Header
     let body: () -> Body
 
     @State private var state: PanelState = .init()
@@ -18,7 +17,7 @@ struct PanelModifier<Body: View, Header: View>: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibility(hidden: isPresented && state.state == .expanded)
-            .overlay(Panel(state: binding, header: header, content: body))
+            .overlay(Panel(state: binding, content: body))
     }
 
     var binding: Binding<PanelState> {
@@ -35,18 +34,15 @@ struct PanelModifier<Body: View, Header: View>: ViewModifier {
 
 extension View {
 
-    public func panel<Content: View, Header: View>(isPresented: Binding<Bool>,
-                                                   @ViewBuilder header: @escaping (Double) -> Header,
+    public func panel<Content: View>(isPresented: Binding<Bool>,
                                                    @ViewBuilder content: @escaping () -> Content) -> some View {
-        self.modifier(PanelModifier(isPresented: isPresented, header: header, body: content))
+        self.modifier(PanelModifier(isPresented: isPresented, body: content))
     }
 
-    public func panel<Item: Identifiable, Content: View, Header: View>(item: Binding<Item?>,
-                                                                       @ViewBuilder header: @escaping (Item, Double) -> Header,
+    public func panel<Item: Identifiable, Content: View>(item: Binding<Item?>,
                                                                        @ViewBuilder content: @escaping (Item) -> Content) -> some View {
         let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
         return self.modifier(PanelModifier(isPresented: binding,
-                                           header: { header(item.wrappedValue!, $0) },
                                            body: { content(item.wrappedValue!) }))
 
     }

@@ -1,17 +1,16 @@
 import SwiftUI
 
-struct HeaderHeightKey: PreferenceKey {
-    static let defaultValue: [CGFloat] = []
+public struct PanelHeaderHeightKey: PreferenceKey {
+    public static let defaultValue: [CGFloat] = []
 
-    static func reduce(value: inout Value, nextValue: () -> Value) {
+    public static func reduce(value: inout Value, nextValue: () -> Value) {
         value += nextValue()
     }
 }
 
-struct Panel<Content: View, Header: View>: View {
+struct Panel<Content: View>: View {
 
     let content: () -> Content
-    let header: (Double) -> Header
 
     @Binding var state: PanelState
 
@@ -19,7 +18,7 @@ struct Panel<Content: View, Header: View>: View {
 
     @Environment(\.horizontalSizeClass) private var sizeClass
 
-    @ScaledMetric private var width: CGFloat = 375
+    @ScaledMetric private var width: CGFloat = 325
 
     @State private var headerHeight: CGFloat = 0
 
@@ -28,10 +27,8 @@ struct Panel<Content: View, Header: View>: View {
     @State private var endState: PanelState?
 
     init(state: Binding<PanelState>,
-         @ViewBuilder header: @escaping (Double) -> Header,
          @ViewBuilder content: @escaping () -> Content) {
         self._state = state
-        self.header = header
         self.content = content
     }
 
@@ -61,7 +58,7 @@ struct Panel<Content: View, Header: View>: View {
         .animation(.spring(), value: currentState)
         .animation(.interactiveSpring())
         .environment(\.panelState, $state)
-        .onPreferenceChange(HeaderHeightKey.self, perform: { value in
+        .onPreferenceChange(PanelHeaderHeightKey.self, perform: { value in
             self.headerHeight = value.first ?? 0
         })
         .onChange(of: state, perform: { [state] value in
@@ -78,51 +75,16 @@ struct Panel<Content: View, Header: View>: View {
         let height = (proxy.size.height - headerHeight) * progress
             + headerHeight
             + (sizeClass == .compact ? 1 : 0) // otherwise the overlay will disappear.
-        return VStack(spacing: 0) {
-            header(in: proxy)
-                .accessibilityAddTraits(.isHeader)
-                .zIndex(1)
-
-            content()
-                .overlayPreferenceValue(PanelOverlayPreferenceKey.self, { value in
-                    if sizeClass == .compact,
-                       let overlay = value {
-                        overlay
-                            .opacity(min(max(1 - Double(progress), 0), 1))
-                            .ignoresSafeArea(.all, edges: ignoredEdges)
-                    }
-                })
-                .accessibility(hidden: state.state != .expanded)
-        }
-        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
-                    .ignoresSafeArea(.all, edges: ignoredEdges))
-        .mask(clip)
-        .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
-        .offset(y: offset)
-        .frame(height: max(height, 0))
-        .accessibilityAction(.escape, {
-            self.state.isPresented = false
-        })
-
-
-
-    }
-
-    var clip: some View {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .ignoresSafeArea(.all, edges: ignoredEdges)
-    }
-
-    func header(in proxy: GeometryProxy) -> some View {
-        self.header(max(min(Double(self.verticalProgress(for: dragState.y, in: proxy)), 1), 0))
-            .layoutPriority(2)
-            .background(GeometryReader { proxy in
-                Color.clear
-                    .preference(key: HeaderHeightKey.self, value: [proxy.size.height])
-            })
-            .background(Color(.secondarySystemBackground))
-            .offset(x: dragState.x, y: dragState.y)
+        return content()
+            .environment(\.panelProgress,
+                         max(min(Double(self.verticalProgress(for: dragState.y, in: proxy)), 1), 0))
+            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
+                        .ignoresSafeArea(.all, edges: ignoredEdges))
+            .mask(clip)
+            .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
+            .offset(y: offset)
+            .frame(height: max(height, 0))
             .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
                         .updating($dragState) { value, state, _ in
                             state.update(offset: value.translation, with: sizeClass)
@@ -135,23 +97,33 @@ struct Panel<Content: View, Header: View>: View {
                                 } else {
                                     end.state = .collapsed
                                 }
-                            } else if dragState.direction == .horizontal {
-                                if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
-                                    end.position = .leading
-                                } else {
-                                    end.position = .trailing
-                                }
-                            }
-                            self.endState = end
-                        }
-                        .onEnded { _ in
-                            if let end = self.endState {
-                                self.state = end
-                                self.endState = nil
+                        } else if dragState.direction == .horizontal {
+                            if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
+                                end.position = .leading
+                            } else {
+                                end.position = .trailing
                             }
                         }
-            )
-            .offset(x: -dragState.x, y: -dragState.y)
+                        self.endState = end
+                    }
+                    .onEnded { _ in
+                        if let end = self.endState {
+                            self.state = end
+                            self.endState = nil
+                        }
+                    }
+        )
+        .accessibilityAction(.escape, {
+            self.state.isPresented = false
+        })
+
+
+
+    }
+
+    var clip: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .ignoresSafeArea(.all, edges: ignoredEdges)
     }
 
     var currentState: PanelState {
@@ -186,8 +158,7 @@ public struct PanelUI_Previews: PreviewProvider {
 
     struct Header: View {
         @Environment(\.panelState) var state
-
-        let progress: Double
+        @Environment(\.panelProgress) var progress
 
         var body: some View {
             HStack {
@@ -228,9 +199,9 @@ public struct PanelUI_Previews: PreviewProvider {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .panel(item: $item, header: { _, progress in
-                Header(progress: progress)
-            }) { item in
+            .panel(item: $item) { item in
+                VStack(spacing: 0) {
+                Header()
                 ScrollView {
                     VStack {
                         HStack {
@@ -257,6 +228,7 @@ public struct PanelUI_Previews: PreviewProvider {
                 })
                 .background(Color.red.ignoresSafeArea(.all, edges: [.bottom, .horizontal]))
 
+            }
             }
         }
     }
