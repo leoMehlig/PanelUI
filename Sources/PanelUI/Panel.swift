@@ -41,7 +41,6 @@ struct Panel<Content: View, Header: View>: View {
             if state.isPresented {
                 if sizeClass == .compact {
                     panel(in: proxy)
-                        .padding(.top, 12)
                         .transition(AnyTransition.opacity.animation(.default)
                                         .combined(with: .move(edge: .bottom)))
                 } else {
@@ -51,13 +50,14 @@ struct Panel<Content: View, Header: View>: View {
                             .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
                         Spacer()
                     }
-                    .padding(20)
                     .transition(AnyTransition.opacity.animation(.default)
                                     .combined(with: .move(edge: state.position == .leading
                                                             ? .leading : .trailing)))
                 }
             }
         }
+        .padding(sizeClass == .compact ? [] : .all, 20)
+        .padding(sizeClass == .compact ? .top : [], 12)
         .animation(.spring(), value: currentState)
         .animation(.interactiveSpring())
         .environment(\.panelState, $state)
