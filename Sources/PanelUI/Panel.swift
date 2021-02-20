@@ -101,6 +101,10 @@ struct Panel<Content: View, Header: View>: View {
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
         .offset(y: offset)
         .frame(height: max(height, 0))
+        .accessibilityAction(.escape, {
+            self.state.isPresented = false
+        })
+
 
 
     }
