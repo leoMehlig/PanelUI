@@ -27,6 +27,13 @@ public struct PanelState: Hashable {
 
     public var state: State = .expanded
     public var position: Position = .trailing
+    public var isPresented: Bool = false {
+        didSet {
+            if oldValue != isPresented {
+                self.state = .expanded
+            }
+        }
+    }
 
 
 }

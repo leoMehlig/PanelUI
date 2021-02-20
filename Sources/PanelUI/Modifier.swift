@@ -18,7 +18,18 @@ struct PanelModifier<Body: View, Header: View>: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibility(hidden: isPresented && state.state == .expanded)
-            .overlay(Panel(isPresented: $isPresented, state: $state, header: header, content: body))
+            .overlay(Panel(state: binding, header: header, content: body))
+    }
+
+    var binding: Binding<PanelState> {
+        Binding(get: {
+            var state = self.state
+            state.isPresented = isPresented
+            return state
+        }, set: { value in
+            self.state = value
+            self.isPresented = value.isPresented
+        })
     }
 }
 

@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct HeaderHeightKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
+    static let defaultValue: [CGFloat] = []
 
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value += nextValue()
     }
 }
 
@@ -13,15 +13,13 @@ struct Panel<Content: View, Header: View>: View {
     let content: () -> Content
     let header: (Double) -> Header
 
-    @Binding var isPresented: Bool
-
     @Binding var state: PanelState
 
     @GestureState private var dragState = DragState()
 
     @Environment(\.horizontalSizeClass) private var sizeClass
 
-    @ScaledMetric private var width: CGFloat = 325
+    @ScaledMetric private var width: CGFloat = 375
 
     @State private var headerHeight: CGFloat = 0
 
@@ -29,11 +27,9 @@ struct Panel<Content: View, Header: View>: View {
 
     @State private var endState: PanelState?
 
-    init(isPresented: Binding<Bool>,
-         state: Binding<PanelState>,
+    init(state: Binding<PanelState>,
          @ViewBuilder header: @escaping (Double) -> Header,
          @ViewBuilder content: @escaping () -> Content) {
-        self._isPresented = isPresented
         self._state = state
         self.header = header
         self.content = content
@@ -42,9 +38,10 @@ struct Panel<Content: View, Header: View>: View {
     @ViewBuilder
     var body: some View {
         GeometryReader { proxy in
-            if isPresented {
+            if state.isPresented {
                 if sizeClass == .compact {
                     panel(in: proxy)
+                        .padding(.top, 12)
                         .transition(AnyTransition.opacity.animation(.default)
                                         .combined(with: .move(edge: .bottom)))
                 } else {
@@ -54,27 +51,22 @@ struct Panel<Content: View, Header: View>: View {
                             .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
                         Spacer()
                     }
+                    .padding(20)
                     .transition(AnyTransition.opacity.animation(.default)
                                     .combined(with: .move(edge: state.position == .leading
                                                             ? .leading : .trailing)))
                 }
             }
         }
-        .padding(sizeClass == .regular ? [.all] : .top, 20)
         .animation(.spring(), value: currentState)
-        .animation(.spring(), value: isPresented)
         .animation(.interactiveSpring())
         .environment(\.panelState, $state)
         .onPreferenceChange(HeaderHeightKey.self, perform: { value in
-            self.headerHeight = value
-        })
-        .onChange(of: isPresented, perform: { _ in
-            UIAccessibility.post(notification: .screenChanged, argument: nil)
-            self.feedback.impactOccurred()
+            self.headerHeight = value.first ?? 0
         })
         .onChange(of: state, perform: { [state] value in
             self.feedback.impactOccurred()
-            if state.state != value.state {
+            if state.state != value.state || value.isPresented != state.isPresented {
                 UIAccessibility.post(notification: .screenChanged, argument: nil)
             }
         })
@@ -83,43 +75,49 @@ struct Panel<Content: View, Header: View>: View {
     func panel(in proxy: GeometryProxy) -> some View {
         let progress = self.verticalProgress(for: dragState.y, in: proxy)
         let offset = (proxy.size.height - headerHeight) * (1 - progress)
-        let height = (proxy.size.height - headerHeight) * progress + headerHeight
+        let height = (proxy.size.height - headerHeight) * progress
+            + headerHeight
+            + (sizeClass == .compact ? 1 : 0) // otherwise the overlay will disappear.
         return VStack(spacing: 0) {
             header(in: proxy)
                 .accessibilityAddTraits(.isHeader)
                 .zIndex(1)
+
             content()
+                .overlayPreferenceValue(PanelOverlayPreferenceKey.self, { value in
+                    if sizeClass == .compact,
+                       let overlay = value {
+                        overlay
+                            .opacity(min(max(1 - Double(progress), 0), 1))
+                            .ignoresSafeArea(.all, edges: ignoredEdges)
+                    }
+                })
                 .accessibility(hidden: state.state != .expanded)
         }
-        .background(self.background)
         .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
-                    .ignoresSafeArea(.container, edges: ignoredEdges))
+                    .ignoresSafeArea(.all, edges: ignoredEdges))
         .mask(clip)
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
         .offset(y: offset)
         .frame(height: max(height, 0))
+
+
     }
 
     var clip: some View {
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .ignoresSafeArea(.container, edges: ignoredEdges)
-    }
-
-    var background: some View {
-        Color(.systemBackground)
-            .ignoresSafeArea(.container, edges: ignoredEdges)
-
+            .ignoresSafeArea(.all, edges: ignoredEdges)
     }
 
     func header(in proxy: GeometryProxy) -> some View {
         self.header(max(min(Double(self.verticalProgress(for: dragState.y, in: proxy)), 1), 0))
-            .background(GeometryReader {
+            .layoutPriority(2)
+            .background(GeometryReader { proxy in
                 Color.clear
-                    .preference(key: HeaderHeightKey.self, value: $0.size.height)
+                    .preference(key: HeaderHeightKey.self, value: [proxy.size.height])
             })
             .background(Color(.secondarySystemBackground))
-            .frame(height: headerHeight)
             .offset(x: dragState.x, y: dragState.y)
             .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
                         .updating($dragState) { value, state, _ in
@@ -172,7 +170,7 @@ struct Panel<Content: View, Header: View>: View {
     }
 
     var ignoredEdges: Edge.Set {
-        sizeClass == .compact ? [.bottom, .horizontal] : []
+       sizeClass == .compact ? [.bottom, .horizontal] : []
     }
 }
 
@@ -253,7 +251,7 @@ public struct PanelUI_Previews: PreviewProvider {
                     }
                     .padding(40)
                 })
-                .background(Color.red.ignoresSafeArea(.container, edges: [.bottom, .horizontal]))
+                .background(Color.red.ignoresSafeArea(.all, edges: [.bottom, .horizontal]))
 
             }
         }
@@ -262,8 +260,8 @@ public struct PanelUI_Previews: PreviewProvider {
         Group {
             Preview()
                 .previewDevice("iPhone 12 Pro")
-//            Preview()
-//                .previewDevice("iPad Pro (11-inch) (2nd generation)")
+            Preview()
+                .previewDevice("iPad Pro (11-inch) (2nd generation)")
         }
     }
 }
