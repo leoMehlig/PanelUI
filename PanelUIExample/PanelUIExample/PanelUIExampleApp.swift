@@ -1,12 +1,5 @@
-//
-//  PanelUIExampleApp.swift
-//  PanelUIExample
-//
-//  Created by Leonard Mehlig on 15.02.21.
-//
-
-import SwiftUI
 import PanelUI
+import SwiftUI
 
 @main
 struct PanelUIExampleApp: App {

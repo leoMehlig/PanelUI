@@ -1,14 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Leonard Mehlig on 17.02.21.
-//
-
 import SwiftUI
 
 struct PanelModifier<Body: View>: ViewModifier {
-
     @Binding var isPresented: Bool
     let body: () -> Body
 
@@ -16,8 +8,8 @@ struct PanelModifier<Body: View>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .accessibility(hidden: isPresented && state.state == .expanded)
-            .overlay(Panel(state: binding, content: body))
+            .accessibility(hidden: self.isPresented && self.state.state == .expanded)
+            .overlay(Panel(state: self.binding, content: self.body))
     }
 
     var binding: Binding<PanelState> {
@@ -33,17 +25,16 @@ struct PanelModifier<Body: View>: ViewModifier {
 }
 
 extension View {
-
     public func panel<Content: View>(isPresented: Binding<Bool>,
-                                                   @ViewBuilder content: @escaping () -> Content) -> some View {
+                                     @ViewBuilder content: @escaping () -> Content) -> some View {
         self.modifier(PanelModifier(isPresented: isPresented, body: content))
     }
 
     public func panel<Item: Identifiable, Content: View>(item: Binding<Item?>,
-                                                                       @ViewBuilder content: @escaping (Item) -> Content) -> some View {
-        let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
-        return self.modifier(PanelModifier(isPresented: binding,
-                                           body: { content(item.wrappedValue!) }))
-
+                                                         @ViewBuilder content: @escaping (Item) -> Content)
+        -> some View {
+            let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
+            return self.modifier(PanelModifier(isPresented: binding,
+                                               body: { content(item.wrappedValue!) }))
     }
 }

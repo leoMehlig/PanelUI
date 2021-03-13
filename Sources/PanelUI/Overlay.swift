@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Leonard Mehlig on 19.02.21.
-//
-
 import SwiftUI
 
 struct PanelOverlayPreferenceKey: PreferenceKey {
@@ -21,7 +14,7 @@ struct PanelOverlayPreferenceKey: PreferenceKey {
 
 extension View {
     public func panelOverlay<Content: View>(_ content: Content) -> some View {
-        return self.preference(key: PanelOverlayPreferenceKey.self,
+        self.preference(key: PanelOverlayPreferenceKey.self,
                         value: AnyView(content))
     }
 }

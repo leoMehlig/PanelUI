@@ -3,22 +3,17 @@
 
 import PackageDescription
 
-let package = Package(
-    name: "PanelUI",
-    platforms: [
-        .iOS(.v14)
-    ],
-    products: [
-        .library(
-            name: "PanelUI",
-            targets: ["PanelUI"]),
-    ],
-    targets: [
-        .target(
-            name: "PanelUI",
-            dependencies: []),
-        .testTarget(
-            name: "PanelUITests",
-            dependencies: ["PanelUI"]),
-    ]
-)
+let package = Package(name: "PanelUI",
+                      platforms: [
+                          .iOS(.v14)
+                      ],
+                      products: [
+                          .library(name: "PanelUI",
+                                   targets: ["PanelUI"])
+                      ],
+                      targets: [
+                          .target(name: "PanelUI",
+                                  dependencies: []),
+                          .testTarget(name: "PanelUITests",
+                                      dependencies: ["PanelUI"])
+                      ])

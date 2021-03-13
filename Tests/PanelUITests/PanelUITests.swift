@@ -1,5 +1,5 @@
-import XCTest
 @testable import PanelUI
+import XCTest
 
 final class PanelUITests: XCTestCase {
     func testExample() {

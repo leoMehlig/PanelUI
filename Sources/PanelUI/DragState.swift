@@ -1,15 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Leonard Mehlig on 17.02.21.
-//
-
 import SwiftUI
 
 extension Panel {
     struct DragState: CustomStringConvertible, Equatable {
-
         enum Direction: Equatable {
             case vertical, horizontal
         }
@@ -22,7 +14,7 @@ extension Panel {
             self.offset = offset
             if sizeClass == .compact {
                 self.direction = .vertical
-            } else if direction == nil {
+            } else if self.direction == nil {
                 if abs(offset.width) > 10 || abs(offset.height) > 10 {
                     if abs(offset.width) > abs(offset.height) {
                         self.direction = .horizontal
@@ -34,30 +26,30 @@ extension Panel {
         }
 
         var y: CGFloat {
-            if direction == .vertical {
-                return offset.height
+            if self.direction == .vertical {
+                return self.offset.height
             } else {
                 return 0
             }
         }
+
         var x: CGFloat {
-            if direction == .horizontal {
-                return offset.width
+            if self.direction == .horizontal {
+                return self.offset.width
             } else {
                 return 0
             }
         }
 
         var description: String {
-            switch direction {
-            case .horizontal:
-                return "↔ \(Int(self.x))"
-            case .vertical:
-                return "↕ \(Int(self.y))"
-            default:
-                return "undecided"
+            switch self.direction {
+                case .horizontal:
+                    return "↔ \(Int(self.x))"
+                case .vertical:
+                    return "↕ \(Int(self.y))"
+                default:
+                    return "undecided"
             }
         }
-
     }
 }

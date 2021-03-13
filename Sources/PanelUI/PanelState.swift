@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Leonard Mehlig on 17.02.21.
-//
-
 import SwiftUI
 
 public struct PanelState: Hashable {
@@ -13,10 +6,10 @@ public struct PanelState: Hashable {
 
         public mutating func toggle() {
             switch self {
-            case .collapsed:
-                self = .expanded
-            case .expanded:
-                self = .collapsed
+                case .collapsed:
+                    self = .expanded
+                case .expanded:
+                    self = .collapsed
             }
         }
     }
@@ -29,13 +22,11 @@ public struct PanelState: Hashable {
     public var position: Position = .trailing
     public var isPresented: Bool = false {
         didSet {
-            if oldValue != isPresented {
+            if oldValue != self.isPresented {
                 self.state = .expanded
             }
         }
     }
-
-
 }
 
 struct PanelStateKey: EnvironmentKey {
