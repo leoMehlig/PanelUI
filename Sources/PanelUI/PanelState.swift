@@ -33,8 +33,8 @@ struct PanelStateKey: EnvironmentKey {
     static var defaultValue: Binding<PanelState> = .constant(.init())
 }
 
-extension EnvironmentValues {
-    public var panelState: Binding<PanelState> {
+public extension EnvironmentValues {
+    var panelState: Binding<PanelState> {
         get { self[PanelStateKey.self] }
         set { self[PanelStateKey.self] = newValue }
     }
@@ -44,8 +44,8 @@ struct PanelProgressKey: EnvironmentKey {
     static var defaultValue: Double = 1
 }
 
-extension EnvironmentValues {
-    public var panelProgress: Double {
+public extension EnvironmentValues {
+    var panelProgress: Double {
         get { self[PanelProgressKey.self] }
         set { self[PanelProgressKey.self] = newValue }
     }

@@ -24,17 +24,17 @@ struct PanelModifier<Body: View>: ViewModifier {
     }
 }
 
-extension View {
-    public func panel<Content: View>(isPresented: Binding<Bool>,
-                                     @ViewBuilder content: @escaping () -> Content) -> some View {
+public extension View {
+    func panel<Content: View>(isPresented: Binding<Bool>,
+                              @ViewBuilder content: @escaping () -> Content) -> some View {
         self.modifier(PanelModifier(isPresented: isPresented, body: content))
     }
 
-    public func panel<Item: Identifiable, Content: View>(item: Binding<Item?>,
-                                                         @ViewBuilder content: @escaping (Item) -> Content)
-        -> some View {
-            let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
-            return self.modifier(PanelModifier(isPresented: binding,
-                                               body: { content(item.wrappedValue!) }))
+    func panel<Item: Identifiable, Content: View>(item: Binding<Item?>,
+                                                  @ViewBuilder content: @escaping (Item) -> Content)
+    -> some View {
+        let binding = Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
+        return self.modifier(PanelModifier(isPresented: binding,
+                                           body: { content(item.wrappedValue!) }))
     }
 }

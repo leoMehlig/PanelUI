@@ -37,8 +37,8 @@ struct Panel<Content: View>: View {
             if state.isPresented {
                 if sizeClass == .compact {
                     panel(in: proxy)
-                        .transition(AnyTransition.opacity.animation(.default)
-                            .combined(with: .move(edge: .bottom)))
+                        // Add additional offset to move it really off screen
+                            .transition(AnyTransition.move(edge: .bottom).combined(with: .offset(y: 30)))
                 } else {
                     HStack(spacing: 0) {
                         panel(in: proxy)
@@ -46,9 +46,8 @@ struct Panel<Content: View>: View {
                             .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
                         Spacer()
                     }
-                    .transition(AnyTransition.opacity.animation(.default)
-                        .combined(with: .move(edge: state.position == .leading
-                                ? .leading : .trailing)))
+                    .transition(.move(edge: state.position == .leading
+                            ? .leading : .trailing))
                 }
             }
         }
@@ -76,44 +75,44 @@ struct Panel<Content: View>: View {
             + (self.sizeClass == .compact ? 1 : 0) // otherwise the overlay will disappear.
         return self.content()
             .environment(\.panelProgress,
-                         max(min(Double(self.verticalProgress(for: self.dragState.y, in: proxy)), 1), 0))
-            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
-                .ignoresSafeArea(.all, edges: self.ignoredEdges))
-            .mask(self.clip)
-            .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
-            .offset(y: offset)
-            .frame(height: max(height, 0))
-            .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
-                .updating($dragState) { value, state, _ in
-                    state.update(offset: value.translation, with: sizeClass)
-                }
-                .onChanged { value in
-                    var end = self.state
-                    if dragState.direction == .vertical {
-                        if verticalProgress(for: value.predictedEndTranslation.height, in: proxy) > 0.5 {
-                            end.state = .expanded
-                        } else {
-                            end.state = .collapsed
-                        }
-                    } else if dragState.direction == .horizontal {
-                        if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
-                            end.position = .leading
-                        } else {
-                            end.position = .trailing
-                        }
+                         max(min(Double(progress), 1), 0))
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.black.opacity(0.5), lineWidth: 1 / UIScreen.main.scale)
+                    .ignoresSafeArea(.all, edges: self.ignoredEdges))
+                .mask(self.clip)
+                .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
+                .offset(y: offset)
+                .frame(height: max(height, 0))
+                .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                    .updating($dragState) { value, state, _ in
+                        state.update(offset: value.translation, with: sizeClass)
                     }
-                    self.endState = end
-                }
-                .onEnded { _ in
-                    if let end = self.endState {
-                        self.state = end
-                        self.endState = nil
+                    .onChanged { value in
+                        var end = self.state
+                        if dragState.direction == .vertical {
+                            if verticalProgress(for: value.predictedEndTranslation.height, in: proxy) > 0.5 {
+                                end.state = .expanded
+                            } else {
+                                end.state = .collapsed
+                            }
+                        } else if dragState.direction == .horizontal {
+                            if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
+                                end.position = .leading
+                            } else {
+                                end.position = .trailing
+                            }
+                        }
+                        self.endState = end
                     }
-                })
-            .accessibilityAction(.escape) {
-                self.state.isPresented = false
-            }
+                    .onEnded { _ in
+                        if let end = self.endState {
+                            self.state = end
+                            self.endState = nil
+                        }
+                    })
+                .accessibilityAction(.escape) {
+                    self.state.isPresented = false
+                }
     }
 
     var clip: some View {

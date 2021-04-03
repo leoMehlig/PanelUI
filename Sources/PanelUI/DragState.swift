@@ -6,7 +6,7 @@ extension Panel {
             case vertical, horizontal
         }
 
-        var direction: Direction? = nil
+        var direction: Direction?
         var offset: CGSize = .zero
         var predictedEnd: CGSize?
 

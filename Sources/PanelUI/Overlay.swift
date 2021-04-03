@@ -12,8 +12,8 @@ struct PanelOverlayPreferenceKey: PreferenceKey {
     }
 }
 
-extension View {
-    public func panelOverlay<Content: View>(_ content: Content) -> some View {
+public extension View {
+    func panelOverlay<Content: View>(_ content: Content) -> some View {
         self.preference(key: PanelOverlayPreferenceKey.self,
                         value: AnyView(content))
     }
