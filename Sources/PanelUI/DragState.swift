@@ -43,12 +43,12 @@ extension Panel {
 
         var description: String {
             switch self.direction {
-                case .horizontal:
-                    return "↔ \(Int(self.x))"
-                case .vertical:
-                    return "↕ \(Int(self.y))"
-                default:
-                    return "undecided"
+            case .horizontal:
+                return "↔ \(Int(self.x))"
+            case .vertical:
+                return "↕ \(Int(self.y))"
+            default:
+                return "undecided"
             }
         }
     }

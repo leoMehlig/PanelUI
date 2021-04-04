@@ -6,10 +6,10 @@ public struct PanelState: Hashable {
 
         public mutating func toggle() {
             switch self {
-                case .collapsed:
-                    self = .expanded
-                case .expanded:
-                    self = .collapsed
+            case .collapsed:
+                self = .expanded
+            case .expanded:
+                self = .collapsed
             }
         }
     }
