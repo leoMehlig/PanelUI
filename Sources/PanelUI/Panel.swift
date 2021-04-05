@@ -25,6 +25,8 @@ struct Panel<Content: View>: View {
 
     @State private var endState: PanelState?
 
+    @Environment(\.panelSafeArea) var safeArea
+
     init(state: Binding<PanelState>,
          @ViewBuilder content: @escaping () -> Content) {
         self._state = state
@@ -38,7 +40,8 @@ struct Panel<Content: View>: View {
                 if sizeClass == .compact {
                     panel(in: proxy)
                         // Add additional offset to move it really off screen
-                            .transition(AnyTransition.move(edge: .bottom).combined(with: .offset(y: 30)))
+                            .transition(AnyTransition.move(edge: .bottom)
+                                            .combined(with: .offset(y: 30)))
                 } else {
                     HStack(spacing: 0) {
                         panel(in: proxy)
@@ -58,13 +61,32 @@ struct Panel<Content: View>: View {
         .environment(\.panelState, $state)
         .onPreferenceChange(PanelHeaderHeightKey.self, perform: { value in
             self.headerHeight = value.first ?? 0
+            self.updateSafeArea(for: state, height: value.first ?? 0, sizeClass: sizeClass)
         })
         .onChange(of: state, perform: { [state] value in
             self.feedback.impactOccurred()
             if state.state != value.state || value.isPresented != state.isPresented {
                 UIAccessibility.post(notification: .screenChanged, argument: nil)
             }
+            self.updateSafeArea(for: value, height: headerHeight, sizeClass: sizeClass)
         })
+        .onChange(of: sizeClass, perform: { [sizeClass] new in
+            if sizeClass != new {
+                if sizeClass == .compact {
+                    self.state.position = .center
+                } else {
+                    self.state.position = .trailing
+                }
+            }
+            self.updateSafeArea(for: state, height: headerHeight, sizeClass: new)
+        })
+        .onAppear {
+            if sizeClass == .compact {
+                self.state.position = .center
+            } else {
+                self.state.position = .trailing
+            }
+        }
     }
 
     func panel(in proxy: GeometryProxy) -> some View {
@@ -113,6 +135,19 @@ struct Panel<Content: View>: View {
                 .accessibilityAction(.escape) {
                     self.state.isPresented = false
                 }
+    }
+
+    func updateSafeArea(for state: PanelState, height: CGFloat, sizeClass: UserInterfaceSizeClass?) {
+        if state.isPresented && state.state == .collapsed {
+            if sizeClass == .compact {
+                self.safeArea.bottomInset = height
+            } else {
+                self.safeArea.bottomInset = height + 20
+            }
+        } else {
+            self.safeArea.bottomInset = 0
+        }
+        self.safeArea.position = state.position
     }
 
     var clip: some View {

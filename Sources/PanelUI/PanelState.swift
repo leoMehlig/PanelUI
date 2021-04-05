@@ -15,11 +15,11 @@ public struct PanelState: Hashable {
     }
 
     public enum Position: Hashable {
-        case leading, trailing
+        case leading, trailing, center
     }
 
     public var state: State = .expanded
-    public var position: Position = .trailing
+    public var position: Position = .center
     public var isPresented: Bool = false {
         didSet {
             if oldValue != self.isPresented {
