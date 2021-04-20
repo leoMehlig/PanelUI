@@ -23,8 +23,6 @@ struct Panel<Content: View>: View {
 
     @State private var feedback = UIImpactFeedbackGenerator()
 
-    @State private var endState: PanelState?
-
     @Environment(\.panelSafeArea) var safeArea
 
     init(state: Binding<PanelState>,
@@ -110,27 +108,23 @@ struct Panel<Content: View>: View {
                         state.update(offset: value.translation, with: sizeClass)
                     }
                     .onChanged { value in
-                        var end = self.state
                         if dragState.direction == .vertical {
                             if verticalProgress(for: value.predictedEndTranslation.height, in: proxy) > 0.5 {
-                                end.state = .expanded
+                                self.state.predictedState = .expanded
                             } else {
-                                end.state = .collapsed
+                                self.state.predictedState = .collapsed
                             }
                         } else if dragState.direction == .horizontal {
                             if horizontalProgress(for: value.predictedEndTranslation.width, in: proxy) < 0.5 {
-                                end.position = .leading
+                                self.state.predictedPosition = .leading
                             } else {
-                                end.position = .trailing
+                                self.state.predictedPosition = .trailing
                             }
                         }
-                        self.endState = end
                     }
                     .onEnded { _ in
-                        if let end = self.endState {
-                            self.state = end
-                            self.endState = nil
-                        }
+                        self.state.state = self.state.predictedState
+                        self.state.position = self.state.predictedPosition
                     })
                 .accessibilityAction(.escape) {
                     self.state.isPresented = false
@@ -155,12 +149,16 @@ struct Panel<Content: View>: View {
             .ignoresSafeArea(.all, edges: ignoredEdges)
     }
 
-    var currentState: PanelState {
-        self.dragState.direction == nil ? self.endState ?? self.state : self.state
+    var currentState: PanelState.State {
+        self.dragState.direction == nil ? self.state.predictedState : self.state.state
     }
 
+    var currentPosition: PanelState.Position {
+        self.dragState.direction == nil ? self.state.predictedPosition : self.state.position
+    }
+    
     func verticalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
-        let height = self.currentState.state == .expanded
+        let height = self.currentState == .expanded
             ? proxy.size.height - offset
             : self.headerHeight - offset
         let progress = (height - self.headerHeight) / (proxy.size.height - self.headerHeight)
@@ -168,7 +166,7 @@ struct Panel<Content: View>: View {
     }
 
     func horizontalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
-        let endWidth = self.currentState.position == .leading
+        let endWidth = self.currentPosition == .leading
             ? offset
             : proxy.size.width + offset - self.width
         return (endWidth) / (proxy.size.width - self.width)

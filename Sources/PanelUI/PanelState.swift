@@ -18,8 +18,22 @@ public struct PanelState: Hashable {
         case leading, trailing, center
     }
 
-    public var state: State = .expanded
-    public var position: Position = .center
+    public var state: State = .expanded {
+        didSet {
+            self.predictedState = state
+        }
+    }
+     
+    public var position: Position = .center {
+        didSet {
+            self.predictedPosition = position
+        }
+    }
+
+    public var predictedState: State = .expanded
+
+    public var predictedPosition: Position = .center
+
     public var isPresented: Bool = false {
         didSet {
             if oldValue != self.isPresented {
