@@ -1,7 +1,6 @@
 import SwiftUI
 
 public struct PanelModifier<Body: View>: ViewModifier {
-
     @Binding var isPresented: Bool
     let body: () -> Body
 
@@ -44,8 +43,7 @@ public extension View {
     func panel<Item: Identifiable, Content: View>(item: Binding<Item?>,
                                                   @ViewBuilder content: @escaping (Item) -> Content)
     -> some View {
-
-        return self.modifier(PanelModifier(item: item,
-                                           body: content))
+        self.modifier(PanelModifier(item: item,
+                                    body: content))
     }
 }

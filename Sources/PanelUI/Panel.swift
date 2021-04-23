@@ -39,7 +39,7 @@ struct Panel<Content: View>: View {
                     panel(in: proxy)
                         // Add additional offset to move it really off screen
                             .transition(AnyTransition.move(edge: .bottom)
-                                            .combined(with: .offset(y: 30)))
+                                .combined(with: .offset(y: 30)))
                 } else {
                     HStack(spacing: 0) {
                         panel(in: proxy)
@@ -132,7 +132,7 @@ struct Panel<Content: View>: View {
     }
 
     func updateSafeArea(for state: PanelState, height: CGFloat, sizeClass: UserInterfaceSizeClass?) {
-        if state.isPresented && state.state == .collapsed {
+        if state.isPresented, state.state == .collapsed {
             if sizeClass == .compact {
                 self.safeArea.bottomInset = height
             } else {
@@ -156,7 +156,7 @@ struct Panel<Content: View>: View {
     var currentPosition: PanelState.Position {
         self.dragState.direction == nil ? self.state.predictedPosition : self.state.position
     }
-    
+
     func verticalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
         let height = self.currentState == .expanded
             ? proxy.size.height - offset

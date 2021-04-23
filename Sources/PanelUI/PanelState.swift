@@ -20,13 +20,13 @@ public struct PanelState: Hashable {
 
     public var state: State = .expanded {
         didSet {
-            self.predictedState = state
+            self.predictedState = self.state
         }
     }
-     
+
     public var position: Position = .center {
         didSet {
-            self.predictedPosition = position
+            self.predictedPosition = self.position
         }
     }
 
