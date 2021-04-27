@@ -5,7 +5,7 @@ import SwiftUI
 struct PanelUIExampleApp: App {
     var body: some Scene {
         WindowGroup {
-            PanelUI_Previews.previews
+            PanelUI_Previews.Preview()
         }
     }
 }

@@ -44,7 +44,7 @@ struct Panel<Content: View>: View {
                     HStack(spacing: 0) {
                         panel(in: proxy)
                             .frame(maxWidth: width)
-                            .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
+
                         Spacer()
                     }
                     .transition(.move(edge: state.position == .leading
@@ -103,6 +103,7 @@ struct Panel<Content: View>: View {
                 .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
                 .offset(y: offset)
                 .frame(height: max(height, 0))
+                .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
                 .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
                     .updating($dragState) { value, state, _ in
                         state.update(offset: value.translation, with: sizeClass)
@@ -169,7 +170,10 @@ struct Panel<Content: View>: View {
         let endWidth = self.currentPosition == .leading
             ? offset
             : proxy.size.width + offset - self.width
-        return (endWidth) / (proxy.size.width - self.width)
+        let result =  (endWidth) / (proxy.size.width - self.width)
+        print(result, endWidth, proxy.size.width, self.width, offset)
+        return result
+
     }
 
     var ignoredEdges: Edge.Set {
@@ -181,6 +185,29 @@ struct Item: Identifiable {
     var id: String
 }
 
+struct SlowView: View {
+    var body: some View {
+        for _ in 0..<10000 {
+            var i = pow(2, 2)
+            i += 1
+        }
+        return [Color.red, Color.blue, Color.green, Color.yellow].randomElement()!
+            .frame(height: 50)
+            .cornerRadius(10)
+            .padding()
+    }
+}
+
+struct List: View {
+    var body: some View {
+        LazyVStack {
+            ForEach(0..<1000) { _ in
+                SlowView()
+            }
+        }
+        .padding()
+    }
+}
 public struct PanelUI_Previews: PreviewProvider {
     struct Header: View {
         @Environment(\.panelState) var state
@@ -200,15 +227,19 @@ public struct PanelUI_Previews: PreviewProvider {
             }
             .padding()
             .background(Color.green.opacity(1 - progress))
+            .background(Color.white)
         }
     }
 
-    struct Preview: View {
+    public struct Preview: View {
         @State var isPresented = true
 
         @State var item: Item? = Item(id: "Test")
 
-        var body: some View {
+        public init() {
+
+        }
+        public var body: some View {
             VStack {
                 Text("Top")
                 Spacer()
@@ -227,29 +258,13 @@ public struct PanelUI_Previews: PreviewProvider {
             .panel(item: $item) { item in
                 VStack(spacing: 0) {
                     Header()
+                        .background(GeometryReader { proxy in
+                            Color.clear
+                                .preference(key: PanelHeaderHeightKey.self, value: [proxy.size.height])
+                        })
                     ScrollView {
-                        VStack {
-                            HStack {
-                                Text(item.id)
-                                Spacer()
-                                Text("Hoho")
-                            }
-                            Spacer()
-                            Button("Done") {
-                                self.item = nil
-                            }
-                        }
-                        .padding()
+                        List()
                     }
-                    .overlay(VStack {
-                        Spacer()
-                        Button(action: {}) {
-                            Text("Action")
-                                .padding(60)
-                                .background(Color.blue)
-                        }
-                        .padding(40)
-                    })
                     .background(Color.red.ignoresSafeArea(.all, edges: [.bottom, .horizontal]))
                 }
             }
