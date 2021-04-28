@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B62199462639E75300FAF68A /* Aiolos in Frameworks */ = {isa = PBXBuildFile; productRef = B62199452639E75300FAF68A /* Aiolos */; };
 		B651A47E25DABE2700097E2F /* PanelUIExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B651A47D25DABE2700097E2F /* PanelUIExampleApp.swift */; };
 		B651A48025DABE2700097E2F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B651A47F25DABE2700097E2F /* ContentView.swift */; };
 		B651A48225DABE2800097E2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B651A48125DABE2800097E2F /* Assets.xcassets */; };
@@ -30,6 +31,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B677C86C25DAC33E0058D163 /* PanelUI in Frameworks */,
+				B62199462639E75300FAF68A /* Aiolos in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +101,7 @@
 			name = PanelUIExample;
 			packageProductDependencies = (
 				B677C86B25DAC33E0058D163 /* PanelUI */,
+				B62199452639E75300FAF68A /* Aiolos */,
 			);
 			productName = PanelUIExample;
 			productReference = B651A47A25DABE2700097E2F /* PanelUIExample.app */;
@@ -128,6 +131,7 @@
 			);
 			mainGroup = B651A47125DABE2700097E2F;
 			packageReferences = (
+				B62199442639E75300FAF68A /* XCRemoteSwiftPackageReference "Aiolos" */,
 			);
 			productRefGroup = B651A47B25DABE2700097E2F /* Products */;
 			projectDirPath = "";
@@ -346,7 +350,23 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		B62199442639E75300FAF68A /* XCRemoteSwiftPackageReference "Aiolos" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/IdeasOnCanvas/Aiolos.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.12;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		B62199452639E75300FAF68A /* Aiolos */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B62199442639E75300FAF68A /* XCRemoteSwiftPackageReference "Aiolos" */;
+			productName = Aiolos;
+		};
 		B677C86B25DAC33E0058D163 /* PanelUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PanelUI;

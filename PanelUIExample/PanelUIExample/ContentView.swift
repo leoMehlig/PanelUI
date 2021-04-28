@@ -1,9 +1,22 @@
 import SwiftUI
+import PanelUI
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Text("Hello, world!")
+                    .padding()
+                Spacer()
+            }
+            Spacer()
+        }
+        .overlay(AiolosWrapper {
+            Text("Hello, world!")
+                .padding()
+        })
     }
 }
 

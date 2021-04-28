@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Aiolos",
+        "repositoryURL": "https://github.com/IdeasOnCanvas/Aiolos.git",
+        "state": {
+          "branch": null,
+          "revision": "a9fe9bb7fc2d07ddec219de8bf9fbe1538ee8bab",
+          "version": "1.5.12"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -11,9 +11,14 @@ let package = Package(name: "PanelUI",
                           .library(name: "PanelUI",
                                    targets: ["PanelUI"])
                       ],
+                      dependencies: [
+                        .package(url: "https://github.com/IdeasOnCanvas/Aiolos.git", from: "1.4.0")
+                      ],
                       targets: [
                           .target(name: "PanelUI",
-                                  dependencies: []),
+                                  dependencies: [
+                                    "Aiolos"
+                                  ]),
                           .testTarget(name: "PanelUITests",
                                       dependencies: ["PanelUI"])
                       ])
