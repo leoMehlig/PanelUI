@@ -20,6 +20,8 @@ struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerReprese
 
     @Binding var state: PanelState
 
+    @Environment(\.panelSafeArea) var safeArea
+
     var progressPublisher: CurrentValueSubject<Double, Never> = CurrentValueSubject(1)
 
     init(state: Binding<PanelState>,
@@ -40,7 +42,7 @@ struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerReprese
 
     func updateUIViewController(_ controller: UIViewControllerType, context: Context) {
         controller.rootView = content
-//        controller.isPresented = isPresented
+        controller.panelSafeArea = safeArea
         controller.progressPublisher = progressPublisher
         controller.headerHeight = headerHeight
         controller.apply(state: state, content: state.isPresented ? panelContent() : nil)

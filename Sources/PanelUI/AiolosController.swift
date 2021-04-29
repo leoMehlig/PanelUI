@@ -43,23 +43,29 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
 
     @Binding var state: PanelState
 
+    var panelSafeArea: PanelSafeArea = .init()
+
     var progressPublisher: CurrentValueSubject<Double, Never> = CurrentValueSubject(1)
 
     func apply(state: PanelState, content: PanelContent?) {
-        
+
         var config = self.panelController.configuration
         config.mode = state.mode
-        switch state.position {
-        case .center:
-            config.position = .bottom
-        case .leading:
-            config.position = .leadingBottom
-        case .trailing:
-            config.position = .trailingBottom
-        }
 
+        if self.traitCollection.horizontalSizeClass == .compact {
+            config.position = .bottom
+        } else {
+            switch state.position {
+            case .leading, .center:
+                config.position = .leadingBottom
+            case .trailing:
+                config.position = .trailingBottom
+            }
+        }
         if config.mode != self.panelController.configuration.mode || config.position != self.panelController.configuration.position {
-            self.panelController.configuration = config
+            DispatchQueue.main.async {
+                self.panelController.configuration = config
+            }
         }
         if state.isPresented != panelController.isVisible {
                 let transition: Aiolos.Panel.Transition = self.traitCollection.horizontalSizeClass == .regular ? .slide(direction: .horizontal) : .slide(direction: .vertical)
@@ -68,6 +74,7 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
                     DispatchQueue.main.async {
                         self.panelController.removeFromParent(transition: transition, completion: {
                             self.panelContent = content
+                            self.state.state = .expanded
                         })
                     }
                 } else {
@@ -77,6 +84,20 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
                     }
             }
         }
+
+        DispatchQueue.main.async {
+            if state.isPresented, state.state == .collapsed {
+                if self.traitCollection.horizontalSizeClass == .compact {
+                    self.panelSafeArea.bottomInset = self.headerHeight
+                } else {
+                    self.panelSafeArea.bottomInset = self.headerHeight + 20
+                }
+            } else {
+                self.panelSafeArea.bottomInset = 0
+            }
+            self.panelSafeArea.position = state.position
+        }
+
     }
 
 
@@ -104,7 +125,7 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
         if changes {
             coordinator.animate(alongsideTransition: { _ in
                 self.panelController.performWithoutAnimation {
-                    self.panelController.configuration = self.configuration(for: newCollection)
+                    self.panelController.configuration = self.configuration(for: newCollection, state: self.state)
                 }
             }, completion: nil)
         }
@@ -116,7 +137,7 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
 
 
     func makePanelController() -> Aiolos.Panel {
-        let panelController = Aiolos.Panel(configuration: self.configuration(for: self.traitCollection))
+        let panelController = Aiolos.Panel(configuration: self.configuration(for: self.traitCollection, state: state))
         let hosting = UIHostingController(rootView: panelContent)
 
 
@@ -179,6 +200,9 @@ extension AiolosController: PanelResizeDelegate {
 
     func panel(_ panel: Aiolos.Panel, willTransitionFrom oldMode: Aiolos.Panel.Configuration.Mode?, to newMode: Aiolos.Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
         print("Panel will transition from \(String(describing: oldMode)) to \(newMode)")
+        DispatchQueue.main.async {
+        }
+        // we can animate things along the way
         switch newMode {
         case .fullHeight:
             self.state.state = .expanded
@@ -187,7 +211,6 @@ extension AiolosController: PanelResizeDelegate {
         default:
             break
         }
-        // we can animate things along the way
         coordinator.animateAlongsideTransition({
             print("Animating alongside of panel transition")
         }, completion: { _ in
@@ -228,6 +251,8 @@ extension AiolosController: PanelRepositionDelegate {
     func panel(_ panel: Aiolos.Panel, willTransitionFrom oldPosition: Aiolos.Panel.Configuration.Position, to newPosition: Aiolos.Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
         print("Panel is transitioning from \(String(describing: oldPosition)) to position \(newPosition)")
 
+        DispatchQueue.main.async {
+        }
         switch newPosition {
         case .bottom:
             self.state.position = .center
@@ -246,13 +271,15 @@ extension AiolosController: PanelRepositionDelegate {
 
     func panelWillTransitionToHiddenState(_ panel: Aiolos.Panel, with coordinator: PanelTransitionCoordinator) {
         print("Panel is transitioning to hidden state")
-
-        self.state.isPresented = false
+        DispatchQueue.main.async {
+            self.state.isPresented = false
+        }
         // we can animate things along the way
         coordinator.animateAlongsideTransition({
             print("Animating alongside of panel transition")
         }, completion: { _ in
             print("Completed panel transition to hidden state")
+            self.state.state = .expanded
         })
     }
 }
@@ -261,7 +288,7 @@ extension AiolosController: PanelRepositionDelegate {
 // MARK: - Private
 private extension AiolosController {
 
-    func configuration(for traitCollection: UITraitCollection) -> Aiolos.Panel.Configuration {
+    func configuration(for traitCollection: UITraitCollection, state: PanelState) -> Aiolos.Panel.Configuration {
         var configuration = Aiolos.Panel.Configuration.default
 
         var panelMargins: NSDirectionalEdgeInsets {
@@ -273,7 +300,7 @@ private extension AiolosController {
         }
         configuration.appearance.resizeHandle = .hidden
         configuration.appearance.separatorColor = .white
-        configuration.position = traitCollection.horizontalSizeClass == .compact ? .bottom : .trailingBottom
+
         configuration.margins = panelMargins
         configuration.supportedModes = [.minimal, .compact, .fullHeight]
         switch self.traitCollection.horizontalSizeClass {
@@ -287,6 +314,25 @@ private extension AiolosController {
             break
         @unknown default:
             break
+        }
+
+
+        switch self.state.state {
+        case .collapsed:
+            configuration.mode = .compact
+        case .expanded:
+            configuration.mode = .fullHeight
+        }
+
+        if self.traitCollection.horizontalSizeClass == .compact {
+            configuration.position = .bottom
+        } else {
+            switch state.position {
+            case .leading, .center:
+                configuration.position = .leadingBottom
+            case .trailing:
+                configuration.position = .trailingBottom
+            }
         }
 
         return configuration

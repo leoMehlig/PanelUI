@@ -34,13 +34,7 @@ public struct PanelState: Hashable {
 
     public var predictedPosition: Position = .center
 
-    public var isPresented: Bool = false {
-        didSet {
-            if oldValue != self.isPresented {
-                self.state = .expanded
-            }
-        }
-    }
+    public var isPresented: Bool = false
 }
 
 struct PanelStateKey: EnvironmentKey {
