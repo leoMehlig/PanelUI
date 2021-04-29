@@ -34,6 +34,7 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
                       progressPublisher: progressPublisher,
                       content: content,
                       panelContent: panelContent)
+            .edgesIgnoringSafeArea(.all)
             .environment(\.panelProgress, progress)
             .onReceive(progressPublisher, perform: {
                 self.progress = $0

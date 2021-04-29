@@ -251,8 +251,13 @@ internal extension Panel {
         case .minimal:
             height = 0.0
         case .fullHeight:
-            let screen = parent.view.window?.screen ?? UIScreen.main
-            height = screen.fixedCoordinateSpace.bounds.height
+//            let screen = parent.view//.window?.screen ?? UIScreen.main
+//            height = screen.fixedCoordinateSpace.bounds.height
+            height = parent.view.bounds.height
+                - self.configuration.margins.top
+                - self.configuration.margins.bottom
+                - parent.view.safeAreaInsets.top
+                - parent.view.safeAreaInsets.bottom
         default:
             height = delegateSize.height
         }

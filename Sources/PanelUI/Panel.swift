@@ -265,13 +265,13 @@ struct ListScrollView: View {
     var body: some View {
         ScrollView {
             VStack {
-                
+                TextField("trst", text: .constant("Test"))
                 Duration(x: $x, foo: { })
                     .transition(AnyTransition.opacity.animation(.default)
                         .combined(with: AnyTransition.move(edge: .bottom)))
-                ForEach(0..<1000) { _ in
+                ForEach(0..<20) { _ in
 //                    SlowView()
-                    Color.red
+                    Color.blue
                 }
             }
             .padding()
@@ -345,6 +345,7 @@ public struct PanelUI_Previews: PreviewProvider {
             }
             .frame(maxWidth: .infinity)
             .padding()
+            .background(Color.gray.edgesIgnoringSafeArea(.all))
             .panel(item: $item) { item in
                 VStack(spacing: 0) {
                     Header()
@@ -353,6 +354,7 @@ public struct PanelUI_Previews: PreviewProvider {
                                 .preference(key: PanelHeaderHeightKey.self, value: [proxy.size.height])
                         })
                     ListScrollView()
+                    Text("end")
 
                 }
             }
