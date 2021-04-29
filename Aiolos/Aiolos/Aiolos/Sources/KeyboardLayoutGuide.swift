@@ -14,7 +14,7 @@ import UIKit
 final class KeyboardLayoutGuide {
 
     private let notificationCenter: NotificationCenter
-    private let bottomConstraint: NSLayoutConstraint
+    let bottomConstraint: NSLayoutConstraint
 
     // MARK: - Properties
 

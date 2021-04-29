@@ -126,8 +126,8 @@ public extension Panel {
         }
 
         //TODO: Changed to avoid wrong animation on closing.
-        self.contentViewController?.view.frame = CGRect(origin: self.panelView.contentView.bounds.origin,
-                                                        size: self.size(for: .fullHeight))
+        self.contentViewController?.view.frame =
+            CGRect(origin: self.panelView.contentView.bounds.origin, size: self.size(for: .fullHeight))
         self.fixLayoutMargins()
     }
 
@@ -253,11 +253,7 @@ internal extension Panel {
         case .fullHeight:
 //            let screen = parent.view//.window?.screen ?? UIScreen.main
 //            height = screen.fixedCoordinateSpace.bounds.height
-            height = parent.view.bounds.height
-                - self.configuration.margins.top
-                - self.configuration.margins.bottom
-                - parent.view.safeAreaInsets.top
-                - parent.view.safeAreaInsets.bottom
+            height = self.constraints.effectiveBounds.height
         default:
             height = delegateSize.height
         }

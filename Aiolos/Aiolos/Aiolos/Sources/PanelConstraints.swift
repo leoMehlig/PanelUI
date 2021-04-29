@@ -105,7 +105,9 @@ internal extension PanelConstraints {
         guard let parentView = self.panel.parent?.view else { return .zero }
 
         let insets = self.panel.configuration.margins
-        return self.safeArea.inset(by: UIEdgeInsets(directionalEdgeInsets: insets, isRTL: parentView.isRTL))
+        return self.safeArea
+            .inset(by: UIEdgeInsets(directionalEdgeInsets: insets, isRTL: parentView.isRTL))
+            .inset(by: .init(top: 0, left: 0, bottom: self.keyboardLayoutGuide.bottomConstraint.constant, right: 0))
     }
 
     var maxHeight: CGFloat {
