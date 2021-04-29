@@ -265,6 +265,7 @@ struct ListScrollView: View {
     var body: some View {
         ScrollView {
             VStack {
+                
                 Duration(x: $x, foo: { })
                     .transition(AnyTransition.opacity.animation(.default)
                         .combined(with: AnyTransition.move(edge: .bottom)))
@@ -298,6 +299,20 @@ public struct PanelUI_Previews: PreviewProvider {
                 .font(.headline)
                 Spacer()
                 Text("\(progress)")
+
+                Button(action: {
+                    switch self.state.wrappedValue.position {
+                    case .leading:
+                        self.state.position.wrappedValue = .trailing
+                    case .trailing:
+                        self.state.position.wrappedValue = .leading
+                    case .center:
+                        self.state.position.wrappedValue = .center
+                    }
+                }) {
+                    Image(systemName: "chevron.down")
+                        .rotationEffect(.radians(-Double.pi * (1 - progress)))
+                }
             }
             .padding()
             .background(Color.green.opacity(1 - progress))
@@ -324,6 +339,7 @@ public struct PanelUI_Previews: PreviewProvider {
                         self.item = nil
                     }
                 }
+
                 Spacer()
                 Text("Buttom")
             }

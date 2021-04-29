@@ -20,6 +20,7 @@ public struct PanelModifier<Body: View>: ViewModifier {
         AiolosPanel(state: binding,
                     content: content,
                     panelContent: self.body)
+            .environment(\.panelState, binding)
 //        content
 //            .accessibility(hidden: self.isPresented && self.state.state == .expanded)
 //            .overlay(Panel(state: self.binding, content: self.body))

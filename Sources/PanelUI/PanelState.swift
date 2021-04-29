@@ -24,7 +24,7 @@ public struct PanelState: Hashable {
         }
     }
 
-    public var position: Position = .center {
+    public var position: Position = .trailing {
         didSet {
             self.predictedPosition = self.position
         }

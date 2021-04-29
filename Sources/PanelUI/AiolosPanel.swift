@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AiolosPanel<Content: View, PanelContent: View>: View {
 
@@ -14,6 +15,10 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
     let content: Content
     var panelContent: () -> PanelContent
     @State private var headerHeight: CGFloat = 0
+
+    @State var progressPublisher: CurrentValueSubject<Double, Never> = CurrentValueSubject(1)
+
+    @State var progress: Double = 1
 
     init(state: Binding<PanelState>,
          content: Content,
@@ -24,10 +29,15 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
     }
 
     var body: some View {
-        AiolosWrapper(isPresented: state.isPresented,
+        AiolosWrapper(state: $state,
                       headerHeight: headerHeight,
+                      progressPublisher: progressPublisher,
                       content: content,
                       panelContent: panelContent)
+            .environment(\.panelProgress, progress)
+            .onReceive(progressPublisher, perform: {
+                self.progress = $0
+            })
             .onPreferenceChange(PanelHeaderHeightKey.self, perform: { value in
                 self.headerHeight = value.first ?? 0
             })

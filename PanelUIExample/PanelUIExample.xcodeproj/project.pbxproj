@@ -16,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B6219947263AB3CD00FAF68A /* Aiolos */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Aiolos; path = ../Aiolos; sourceTree = "<group>"; };
 		B651A47A25DABE2700097E2F /* PanelUIExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PanelUIExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B651A47D25DABE2700097E2F /* PanelUIExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelUIExampleApp.swift; sourceTree = "<group>"; };
 		B651A47F25DABE2700097E2F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -43,6 +44,7 @@
 			children = (
 				B651A47C25DABE2700097E2F /* PanelUIExample */,
 				B651A48D25DABE3A00097E2F /* PanelUI */,
+				B6219947263AB3CD00FAF68A /* Aiolos */,
 				B651A47B25DABE2700097E2F /* Products */,
 				B677C86A25DAC33D0058D163 /* Frameworks */,
 			);

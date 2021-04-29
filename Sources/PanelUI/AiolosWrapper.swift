@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerRepresentable {
 
@@ -17,32 +18,32 @@ struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerReprese
 
     var headerHeight: CGFloat
 
-    var isPresented: Bool
+    @Binding var state: PanelState
 
-    init(isPresented: Bool,
+    var progressPublisher: CurrentValueSubject<Double, Never> = CurrentValueSubject(1)
+
+    init(state: Binding<PanelState>,
          headerHeight: CGFloat,
+         progressPublisher: CurrentValueSubject<Double, Never>,
          content: Content,
          @ViewBuilder panelContent: @escaping () -> PanelContent) {
         self.content = content
         self.panelContent = panelContent
-        self.isPresented = isPresented
+        self.progressPublisher = progressPublisher
+        self._state = state
         self.headerHeight = headerHeight
     }
 
     func makeUIViewController(context: Context) -> UIViewControllerType {
-        return AiolosController<Content, PanelContent>(rootView: content)
+        return AiolosController<Content, PanelContent>(rootView: content, state: $state)
     }
 
     func updateUIViewController(_ controller: UIViewControllerType, context: Context) {
         controller.rootView = content
-        if isPresented {
-            controller.panelContent = panelContent()
-        } else {
-            controller.panelContent = nil
-        }
-        controller.isPresented = isPresented
+//        controller.isPresented = isPresented
+        controller.progressPublisher = progressPublisher
         controller.headerHeight = headerHeight
-
+        controller.apply(state: state, content: state.isPresented ? panelContent() : nil)
     }
 
 }
