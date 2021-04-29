@@ -73,6 +73,7 @@ public final class Panel: UIViewController {
     }
 }
 
+
 // MARK: - UIViewController
 
 public extension Panel {
@@ -125,9 +126,13 @@ public extension Panel {
             self.separatorView.frame = dividerFrame
         }
 
+        let fullSize = self.size(for: .fullHeight)
+
         //TODO: Changed to avoid wrong animation on closing.
         self.contentViewController?.view.frame =
-            CGRect(origin: self.panelView.contentView.bounds.origin, size: self.size(for: .fullHeight))
+            CGRect(origin: self.panelView.contentView.bounds.origin,
+                   size: CGSize(width: self.panelView.contentView.bounds.width,
+                                height: max(self.panelView.contentView.bounds.height, fullSize.height)))
         self.fixLayoutMargins()
     }
 
