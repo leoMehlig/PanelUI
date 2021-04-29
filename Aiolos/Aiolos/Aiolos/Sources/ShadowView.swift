@@ -1,17 +1,7 @@
-//
-//  ShadowView.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 04/08/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Internal class that is used to display a shadow around the Panel
 final class ShadowView: UIView {
-
     // MARK: - Lifecycle
 
     init(configuration: Panel.Configuration) {
@@ -20,6 +10,7 @@ final class ShadowView: UIView {
         self.configure(with: configuration)
     }
 
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -53,7 +44,6 @@ final class ShadowView: UIView {
 // MARK: - Private
 
 private extension CGSize {
-
     init(offset: UIOffset) {
         self.init(width: offset.horizontal, height: offset.vertical)
     }

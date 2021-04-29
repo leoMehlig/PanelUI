@@ -1,15 +1,7 @@
-//
-//  SwiftUIView.swift
-//  
-//
-//  Created by Leonard Mehlig on 28.04.21.
-//
-
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerRepresentable {
-
     typealias UIViewControllerType = AiolosController<Content, PanelContent>
 
     var content: Content
@@ -37,21 +29,20 @@ struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerReprese
     }
 
     func makeUIViewController(context: Context) -> UIViewControllerType {
-        return AiolosController<Content, PanelContent>(rootView: content, state: $state)
+        AiolosController<Content, PanelContent>(rootView: self.content, state: $state)
     }
 
     func updateUIViewController(_ controller: UIViewControllerType, context: Context) {
-        controller.rootView = content
-        controller.panelSafeArea = safeArea
-        controller.progressPublisher = progressPublisher
-        controller.headerHeight = headerHeight
-        controller.apply(state: state, content: state.isPresented ? panelContent() : nil)
+        controller.rootView = self.content
+        controller.panelSafeArea = self.safeArea
+        controller.progressPublisher = self.progressPublisher
+        controller.headerHeight = self.headerHeight
+        controller.apply(state: self.state, content: self.state.isPresented ? self.panelContent() : nil)
     }
-
 }
 
-//struct AiolosWrapper_Previews: PreviewProvider {
+// struct AiolosWrapper_Previews: PreviewProvider {
 //    static var previews: some View {
 //        SwiftUIView()
 //    }
-//}
+// }

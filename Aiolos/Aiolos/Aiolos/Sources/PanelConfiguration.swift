@@ -1,17 +1,7 @@
-//
-//  PanelConfiguration.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 11/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Allows to configure the appearance of the floating panel
 public extension Panel {
-
     enum Constants {
         public enum Animation {
             public static let duration: TimeInterval = 0.42
@@ -67,23 +57,29 @@ public extension Panel {
 }
 
 public extension Panel.Configuration {
-
     static var `default`: Panel.Configuration {
         let appearance = Appearance(visualEffect: UIBlurEffect(style: .extraLight),
                                     borderColor: UIColor.gray.withAlphaComponent(0.5),
                                     separatorColor: UIColor.gray.withAlphaComponent(0.5),
                                     cornerRadius: 10.0,
-                                    maskedCorners: [.layerMinXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner],
+                                    maskedCorners: [
+                                        .layerMinXMinYCorner,
+                                        .layerMinXMaxYCorner,
+                                        .layerMaxXMinYCorner,
+                                        .layerMaxXMaxYCorner
+                                    ],
                                     shadowColor: .black,
                                     shadowOpacity: 0.15,
                                     shadowOffset: UIOffset(horizontal: 0.0, vertical: 1.0),
                                     shadowRadius: 3.0,
-                                    resizeHandle: .visible(foregroundColor: UIColor.gray.withAlphaComponent(0.3), backgroundColor: .white))
+                                    resizeHandle: .visible(foregroundColor: UIColor.gray.withAlphaComponent(0.3),
+                                                           backgroundColor: .white))
 
         return Panel.Configuration(position: .bottom,
                                    positionLogic: PositionLogic.respectAllSafeAreas,
                                    supportedPositions: [.bottom],
-                                   margins: NSDirectionalEdgeInsets(top: 10.0, leading: 10.0, bottom: 0.0, trailing: 10.0),
+                                   margins: NSDirectionalEdgeInsets(top: 10.0, leading: 10.0, bottom: 0.0,
+                                                                    trailing: 10.0),
                                    mode: .compact,
                                    supportedModes: [.compact, .expanded, .fullHeight],
                                    gestureResizingMode: .includingContent,
@@ -92,7 +88,6 @@ public extension Panel.Configuration {
 }
 
 extension Panel.Configuration {
-
     /// Makes sure that all specified values of the Panel are correct
     func validated() -> Panel.Configuration {
         var validated = self
@@ -164,17 +159,17 @@ public enum _PanelPositionLogic: Int {
     case ignoreSafeArea
 
     public static var respectAllSafeAreas: [Panel.Configuration.Edge: Panel.Configuration.PositionLogic] {
-        return [.top: .respectSafeArea, .leading: .respectSafeArea, .bottom: .respectSafeArea, .trailing: .respectSafeArea]
+        [.top: .respectSafeArea, .leading: .respectSafeArea, .bottom: .respectSafeArea, .trailing: .respectSafeArea]
     }
 
     public static var ignoreAllSafeAreas: [Panel.Configuration.Edge: Panel.Configuration.PositionLogic] {
-        return [.top: .ignoreSafeArea, .leading: .ignoreSafeArea, .bottom: .ignoreSafeArea, .trailing: .ignoreSafeArea]
+        [.top: .ignoreSafeArea, .leading: .ignoreSafeArea, .bottom: .ignoreSafeArea, .trailing: .ignoreSafeArea]
     }
 }
 
 extension _PanelPositionLogic {
-
-    func applyingInsets(of view: UIView, to insets: NSDirectionalEdgeInsets, edge: Panel.Configuration.Edge) -> NSDirectionalEdgeInsets {
+    func applyingInsets(of view: UIView, to insets: NSDirectionalEdgeInsets,
+                        edge: Panel.Configuration.Edge) -> NSDirectionalEdgeInsets {
         var insets = insets
 
         switch (self, edge) {
@@ -196,9 +191,10 @@ extension _PanelPositionLogic {
 }
 
 extension Panel.Configuration.GestureResizingMode {
-
     public static let includingContent: Self = [.handle, .content, .byTouch, .byPointerScroll]
     public static let excludingContent: Self = [.handle, .byTouch, .byPointerScroll]
     var isPanningByTouchEnabled: Bool { self.contains(.byTouch) && (self.contains(.content) || self.contains(.handle)) }
-    var isScrollingByPointerEnabled: Bool { self.contains(.byPointerScroll) && (self.contains(.content) || self.contains(.handle)) }
+    var isScrollingByPointerEnabled: Bool {
+        self.contains(.byPointerScroll) && (self.contains(.content) || self.contains(.handle))
+    }
 }

@@ -1,17 +1,7 @@
-//
-//  PanelTransition.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 08/08/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Enum that can be used to modify the panel's initial appearance/disappearance transition
 public extension Panel {
-
     enum Direction {
         case horizontal
         case vertical
@@ -36,7 +26,6 @@ public extension Panel {
 // MARK: - Equatable
 
 extension Panel.Transition: Equatable {
-
     public static func == (lhs: Panel.Transition, rhs: Panel.Transition) -> Bool {
         switch (lhs, rhs) {
         case (.none, .none):

@@ -1,18 +1,8 @@
-//
-//  PanelView.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 11/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// The view of the Panel
 @objc
 public final class PanelView: UIVisualEffectView {
-
     // MARK: - Lifecycle
 
     public init(configuration: Panel.Configuration) {
@@ -22,6 +12,7 @@ public final class PanelView: UIVisualEffectView {
         self.configure(with: configuration)
     }
 
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

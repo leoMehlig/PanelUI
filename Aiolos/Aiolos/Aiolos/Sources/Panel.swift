@@ -1,20 +1,10 @@
-//
-//  Panel.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 11/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// A floating Panel inspired by the iOS 11 Maps.app UI
 @objc
 public final class Panel: UIViewController {
-
-    private var shadowView: ShadowView? { return self.viewIfLoaded as? ShadowView }
-    private var containerView: ContainerView? { return self.viewIfLoaded?.subviews.first as? ContainerView }
+    private var shadowView: ShadowView? { self.viewIfLoaded as? ShadowView }
+    private var containerView: ContainerView? { self.viewIfLoaded?.subviews.first as? ContainerView }
     private lazy var separatorView: SeparatorView = self.makeSeparatorView()
 
     private lazy var gestures: PanelGestures = self.makeGestures()
@@ -28,9 +18,9 @@ public final class Panel: UIViewController {
 
     // MARK: - Properties
 
-    @objc private(set) public lazy var panelView: PanelView = self.makePanelView()
-    @objc private(set) public lazy var resizeHandle: ResizeHandle = self.makeResizeHandle()
-    @objc public var isVisible: Bool { return self.parent != nil && self.animator.isMovingFromParent == false }
+    @objc public private(set) lazy var panelView: PanelView = self.makePanelView()
+    @objc public private(set) lazy var resizeHandle: ResizeHandle = self.makeResizeHandle()
+    @objc public var isVisible: Bool { self.parent != nil && self.animator.isMovingFromParent == false }
     public weak var sizeDelegate: PanelSizeDelegate?
     public weak var resizeDelegate: PanelResizeDelegate?
     public weak var repositionDelegate: PanelRepositionDelegate?
@@ -44,7 +34,7 @@ public final class Panel: UIViewController {
     }
 
     public var configuration: Configuration {
-        get { return self._configuration }
+        get { self._configuration }
         set { self._configuration = newValue.validated() }
     }
 
@@ -68,26 +58,25 @@ public final class Panel: UIViewController {
         self.init(configuration: .default)
     }
 
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
 
-
 // MARK: - UIViewController
 
 public extension Panel {
-
     override var shouldAutomaticallyForwardAppearanceMethods: Bool {
-        return false
+        false
     }
 
     override var isMovingToParent: Bool {
-        return self.animator.isMovingToParent
+        self.animator.isMovingToParent
     }
 
     override var isMovingFromParent: Bool {
-        return self.animator.isMovingFromParent
+        self.animator.isMovingFromParent
     }
 
     override func loadView() {
@@ -105,14 +94,15 @@ public extension Panel {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        switch configuration.appearance.resizeHandle {
+        switch self.configuration.appearance.resizeHandle {
         case .hidden:
             self.resizeHandle.frame = .null
             self.separatorView.frame = .null
             self.panelView.frame = self.view.bounds
 
         case .visible:
-            let (resizeFrame, panelFrame) = self.view.bounds.divided(atDistance: ResizeHandle.Constants.height, from: .minYEdge)
+            let (resizeFrame, panelFrame) = self.view.bounds
+                .divided(atDistance: ResizeHandle.Constants.height, from: .minYEdge)
             self.resizeHandle.frame = resizeFrame
             self.panelView.frame = panelFrame
 
@@ -128,7 +118,7 @@ public extension Panel {
 
         let fullSize = self.size(for: .fullHeight)
 
-        //TODO: Changed to avoid wrong animation on closing.
+        // TODO: Changed to avoid wrong animation on closing.
         self.contentViewController?.view.frame =
             CGRect(origin: self.panelView.contentView.bounds.origin,
                    size: CGSize(width: self.panelView.contentView.bounds.width,
@@ -136,7 +126,8 @@ public extension Panel {
         self.fixLayoutMargins()
     }
 
-    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+    override func willTransition(to newCollection: UITraitCollection,
+                                 with coordinator: UIViewControllerTransitionCoordinator) {
         // not calling through to contentVC because we set a fixed traitCollection
         if newCollection.horizontalSizeClass != self.traitCollection.horizontalSizeClass {
             self.gestures.cancel()
@@ -159,7 +150,6 @@ public extension Panel {
 // MARK: - Panel
 
 public extension Panel {
-
     func add(to parent: UIViewController, transition: Transition = .none, completion: (() -> Void)? = nil) {
         guard self.parent !== parent || self.animator.isMovingFromParent else { return }
 
@@ -223,18 +213,16 @@ public extension Panel {
 // MARK: - ObjC Compatibility
 
 public extension Panel {
-
     @objc(isInMode:)
     @available(swift, obsoleted: 1.0)
     func isInMode(_ mode: Configuration.Mode) -> Bool {
-        return self.configuration.mode == mode
+        self.configuration.mode == mode
     }
 }
 
 // MARK: - Internal
 
 internal extension Panel {
-
     public func size(for mode: Configuration.Mode) -> CGSize {
         guard let sizeDelegate = self.sizeDelegate else { return .zero }
         guard let parent = self.parent else { return .zero }
@@ -294,7 +282,8 @@ internal extension Panel {
                 let safeAreaConstraints = view.constraints.filter { constraint in
                     guard let identifier = constraint.identifier else { return false }
 
-                    return identifier.hasPrefix("UIView" + "SafeAre" + "aLayout" + "Guide") || identifier.hasSuffix("-guide" + "-constraint")
+                    return identifier.hasPrefix("UIView" + "SafeAre" + "aLayout" + "Guide") || identifier
+                        .hasSuffix("-guide" + "-constraint")
                 }
 
                 for constraint in safeAreaConstraints {
@@ -314,9 +303,8 @@ internal extension Panel {
 // MARK: - Factory
 
 private extension Panel {
-
     func makePanelView() -> PanelView {
-        return PanelView(configuration: self.configuration)
+        PanelView(configuration: self.configuration)
     }
 
     func makeShadowView(for view: UIView) -> UIView {
@@ -333,7 +321,7 @@ private extension Panel {
             shadowView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             shadowView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
             shadowView.trailingAnchor.constraint(equalTo: container.trailingAnchor)
-            ])
+        ])
 
         return shadowView
     }
@@ -351,27 +339,27 @@ private extension Panel {
     }
 
     func makeSeparatorView() -> SeparatorView {
-        return SeparatorView(configuration: self.configuration)
+        SeparatorView(configuration: self.configuration)
     }
 
     func makeGestures() -> PanelGestures {
-        return PanelGestures(panel: self)
+        PanelGestures(panel: self)
     }
 
     func makeConstraints() -> PanelConstraints {
-        return PanelConstraints(panel: self)
+        PanelConstraints(panel: self)
     }
 
     func makeAnimator() -> PanelAnimator {
-        return PanelAnimator(panel: self)
+        PanelAnimator(panel: self)
     }
 }
 
 // MARK: - Layout
 
 private extension Panel {
-
-    func exchangeContentViewController(_ oldContentViewController: UIViewController?, with newContentViewController: UIViewController?) {
+    func exchangeContentViewController(_ oldContentViewController: UIViewController?,
+                                       with newContentViewController: UIViewController?) {
         let callAppearanceMethods = self.isVisible
 
         // remove old contentViewController
@@ -418,14 +406,17 @@ private extension Panel {
         if modeChanged || positionChanged {
             let size = self.size(for: newConfiguration.mode)
 
-            if modeChanged { self.animator.notifyDelegateOfTransition(from: oldConfiguration.mode, to: newConfiguration.mode) }
+            if modeChanged {
+                self.animator.notifyDelegateOfTransition(from: oldConfiguration.mode, to: newConfiguration.mode)
+            }
             self.animator.notifyDelegateOfTransition(to: size)
             self.constraints.updateSizeConstraints(for: size)
             self.updateAccessibility(for: newConfiguration.mode)
         }
 
         if positionChanged || positionLogicChanged || marginsChanged {
-            self.constraints.updatePositionConstraints(for: newConfiguration.position, margins: newConfiguration.margins)
+            self.constraints.updatePositionConstraints(for: newConfiguration.position,
+                                                       margins: newConfiguration.margins)
         }
     }
 
@@ -433,7 +424,9 @@ private extension Panel {
         guard let contentView = self.contentViewController?.view else { return }
 
         if let accessibilityDelegate = self.accessibilityDelegate {
-            self.resizeHandle.accessibilityLabel = accessibilityDelegate.panel(self, accessibilityLabelForResizeHandle: self.resizeHandle)
+            self.resizeHandle.accessibilityLabel = accessibilityDelegate.panel(self,
+                                                                               accessibilityLabelForResizeHandle: self
+                                                                                   .resizeHandle)
         }
 
         let elementsHidden = mode == .minimal || mode == .compact

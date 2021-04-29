@@ -1,15 +1,7 @@
-//
-//  SwiftUIView.swift
-//  
-//
-//  Created by Leonard Mehlig on 29.04.21.
-//
-
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct AiolosPanel<Content: View, PanelContent: View>: View {
-
     @Binding var state: PanelState
 
     let content: Content
@@ -44,9 +36,10 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
             })
     }
 }
+
 //
-//struct SwiftUIView_Previews: PreviewProvider {
+// struct SwiftUIView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        SwiftUIView()
 //    }
-//}
+// }

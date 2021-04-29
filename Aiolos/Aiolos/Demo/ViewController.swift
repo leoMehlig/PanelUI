@@ -1,18 +1,8 @@
-//
-//  ViewController.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 11/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import Aiolos
 import UIKit
 
-
 /// The RootViewController of the Demo
 final class ViewController: UIViewController {
-
     private lazy var panelController: Panel = self.makePanelController()
 
     // MARK: - UIViewController
@@ -31,7 +21,8 @@ final class ViewController: UIViewController {
             safeAreaView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 8.0),
             safeAreaView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 8.0),
             safeAreaView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -8.0),
-            safeAreaView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -8.0)
+            safeAreaView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor,
+                                                   constant: -8.0)
         ])
 
         let textField = UITextField(frame: CGRect(x: 50.0, y: 110.0, width: 150.0, height: 44.0))
@@ -40,14 +31,16 @@ final class ViewController: UIViewController {
         self.view.addSubview(textField)
 
         self.navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(handleToggleVisibilityPress)),
+            UIBarButtonItem(barButtonSystemItem: .refresh, target: self,
+                            action: #selector(handleToggleVisibilityPress)),
             UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleToggleModePress))
         ]
 
         self.panelController.add(to: self, transition: .none)
     }
 
-    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+    override func willTransition(to newCollection: UITraitCollection,
+                                 with coordinator: UIViewControllerTransitionCoordinator) {
         super.willTransition(to: newCollection, with: coordinator)
 
         coordinator.animate(alongsideTransition: { _ in
@@ -58,14 +51,13 @@ final class ViewController: UIViewController {
     }
 
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-        return [.bottom]
+        [.bottom]
     }
 }
 
 // MARK: - UITextFieldDelegate
 
 extension ViewController: UITextFieldDelegate {
-
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return false
@@ -75,7 +67,6 @@ extension ViewController: UITextFieldDelegate {
 // MARK: - PanelSizeDelegate
 
 extension ViewController: PanelSizeDelegate {
-
     func panel(_ panel: Panel, sizeForMode mode: Panel.Configuration.Mode) -> CGSize {
         func panelWidth(for position: Panel.Configuration.Position) -> CGFloat {
             if position == .bottom { return 0.0 }
@@ -101,7 +92,6 @@ extension ViewController: PanelSizeDelegate {
 // MARK: - PanelResizeDelegate
 
 extension ViewController: PanelResizeDelegate {
-
     func panelDidStartResizing(_ panel: Panel) {
         print("Panel did start resizing")
     }
@@ -110,7 +100,8 @@ extension ViewController: PanelResizeDelegate {
         print("Panel will resize to size \(size)")
     }
 
-    func panel(_ panel: Panel, willTransitionFrom oldMode: Panel.Configuration.Mode?, to newMode: Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
+    func panel(_ panel: Panel, willTransitionFrom oldMode: Panel.Configuration.Mode?,
+               to newMode: Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
         print("Panel will transition from \(String(describing: oldMode)) to \(newMode)")
 
         // we can animate things along the way
@@ -125,13 +116,12 @@ extension ViewController: PanelResizeDelegate {
 // MARK: - PanelRepositionDelegate
 
 extension ViewController: PanelRepositionDelegate {
-
     func panelCanStartMoving(_ panel: Panel) -> Bool {
-        return self.traitCollection.userInterfaceIdiom == .pad
+        self.traitCollection.userInterfaceIdiom == .pad
     }
 
     func panelCanBeDismissed(_ panel: Panel) -> Bool {
-        return true
+        true
     }
 
     func panel(_ panel: Panel, willMoveTo frame: CGRect) -> Bool {
@@ -142,7 +132,8 @@ extension ViewController: PanelRepositionDelegate {
         return true
     }
 
-    func panel(_ panel: Panel, didStopMoving endFrame: CGRect, with context: PanelRepositionContext) -> PanelRepositionContext.Instruction {
+    func panel(_ panel: Panel, didStopMoving endFrame: CGRect,
+               with context: PanelRepositionContext) -> PanelRepositionContext.Instruction {
         print("Panel did move to frame \(endFrame)")
 
         let panelShouldHide = context.isMovingPastLeadingEdge || context.isMovingPastTrailingEdge
@@ -151,7 +142,8 @@ extension ViewController: PanelRepositionDelegate {
         return .updatePosition(context.targetPosition)
     }
 
-    func panel(_ panel: Panel, willTransitionFrom oldPosition: Panel.Configuration.Position, to newPosition: Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
+    func panel(_ panel: Panel, willTransitionFrom oldPosition: Panel.Configuration.Position,
+               to newPosition: Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
         print("Panel is transitioning from \(String(describing: oldPosition)) to position \(newPosition)")
 
         // we can animate things along the way
@@ -177,10 +169,12 @@ extension ViewController: PanelRepositionDelegate {
 // MARK: - UIGestureRecognizerDelegate
 
 extension ViewController: UIGestureRecognizerDelegate {
-
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let contentNavigationController = self.panelController.contentViewController as? UINavigationController else { return false }
-        guard let tableViewController = contentNavigationController.topViewController as? UITableViewController else { return false }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let contentNavigationController = self.panelController.contentViewController as? UINavigationController
+        else { return false }
+        guard let tableViewController = contentNavigationController.topViewController as? UITableViewController
+        else { return false }
 
         // Prevent swipes on the table view being triggered as the panel is being dragged horizontally
         // More info: https://github.com/IdeasOnCanvas/Aiolos/issues/23
@@ -191,10 +185,11 @@ extension ViewController: UIGestureRecognizerDelegate {
 // MARK: - Private
 
 private extension ViewController {
-
     func makePanelController() -> Panel {
         let panelController = Panel(configuration: self.configuration(for: self.traitCollection))
-        let contentNavigationController = UINavigationController(rootViewController: PanelContentViewController(color: UIColor.red.withAlphaComponent(0.4)))
+        let contentNavigationController =
+            UINavigationController(rootViewController: PanelContentViewController(color: UIColor.red
+                    .withAlphaComponent(0.4)))
         contentNavigationController.navigationBar.barTintColor = .white
         contentNavigationController.navigationBar.isTranslucent = false
         contentNavigationController.setToolbarHidden(false, animated: false)
@@ -220,10 +215,12 @@ private extension ViewController {
         }
 
         var panelMargins: NSDirectionalEdgeInsets {
-            if traitCollection.userInterfaceIdiom == .pad || traitCollection.hasNotch { return NSDirectionalEdgeInsets(top: 20.0, leading: 20.0, bottom: 20.0, trailing: 20.0) }
+            if traitCollection.userInterfaceIdiom == .pad || traitCollection
+                .hasNotch { return NSDirectionalEdgeInsets(top: 20.0, leading: 20.0, bottom: 20.0, trailing: 20.0) }
 
             let horizontalMargin: CGFloat = traitCollection.verticalSizeClass == .compact ? 20.0 : 0.0
-            return NSDirectionalEdgeInsets(top: 20.0, leading: horizontalMargin, bottom: 0.0, trailing: horizontalMargin)
+            return NSDirectionalEdgeInsets(top: 20.0, leading: horizontalMargin, bottom: 0.0,
+                                           trailing: horizontalMargin)
         }
 
         configuration.appearance.separatorColor = .white
@@ -232,13 +229,23 @@ private extension ViewController {
 
         if self.traitCollection.userInterfaceIdiom == .pad {
             configuration.supportedPositions = [.leadingBottom, .trailingBottom]
-            configuration.appearance.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            configuration.appearance.maskedCorners = [
+                .layerMinXMinYCorner,
+                .layerMaxXMinYCorner,
+                .layerMinXMaxYCorner,
+                .layerMaxXMaxYCorner
+            ]
         } else {
             configuration.supportedModes = [.minimal, .compact, .expanded, .fullHeight]
             configuration.supportedPositions = [configuration.position]
 
             if traitCollection.hasNotch {
-                configuration.appearance.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+                configuration.appearance.maskedCorners = [
+                    .layerMinXMinYCorner,
+                    .layerMaxXMinYCorner,
+                    .layerMinXMaxYCorner,
+                    .layerMaxXMaxYCorner
+                ]
             } else {
                 configuration.appearance.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
             }
@@ -249,7 +256,8 @@ private extension ViewController {
 
     @objc
     func handleToggleVisibilityPress() {
-        let transition: Panel.Transition = self.traitCollection.userInterfaceIdiom == .pad ? .slide(direction: .horizontal) : .slide(direction: .vertical)
+        let transition: Panel.Transition = self.traitCollection
+            .userInterfaceIdiom == .pad ? .slide(direction: .horizontal) : .slide(direction: .vertical)
 
         if self.panelController.isVisible {
             self.panelController.removeFromParent(transition: transition)
@@ -260,9 +268,11 @@ private extension ViewController {
 
     @objc
     func handleToggleModePress() {
-        let nextModeMapping: [Panel.Configuration.Mode: Panel.Configuration.Mode] = [ .compact: .expanded,
-                                                                                      .expanded: .fullHeight,
-                                                                                      .fullHeight: .compact ]
+        let nextModeMapping: [Panel.Configuration.Mode: Panel.Configuration.Mode] = [
+            .compact: .expanded,
+            .expanded: .fullHeight,
+            .fullHeight: .compact
+        ]
         guard let nextMode = nextModeMapping[self.panelController.configuration.mode] else { return }
 
         self.panelController.configuration.mode = nextMode
@@ -270,8 +280,7 @@ private extension ViewController {
 }
 
 private extension UITraitCollection {
-
     var hasNotch: Bool {
-        return UIApplication.shared.keyWindow!.safeAreaInsets.bottom > 0.0
+        UIApplication.shared.keyWindow!.safeAreaInsets.bottom > 0.0
     }
 }

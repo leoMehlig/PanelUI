@@ -1,16 +1,6 @@
-//
-//  PanelRepositionContext.swift
-//  Aiolos
-//
-//  Created by Tom Kraina on 13/02/2019.
-//  Copyright © 2019 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
 
-
 public final class PanelRepositionContext {
-
     public enum Instruction {
         case updatePosition(_ newPosition: Panel.Configuration.Position)
         case hide
@@ -39,17 +29,17 @@ public final class PanelRepositionContext {
     // MARK: PanelRepositionContext
 
     public var originalPosition: Panel.Configuration.Position {
-        return self.panel.configuration.position
+        self.panel.configuration.position
     }
 
     public var targetPosition: Panel.Configuration.Position {
         let supportedPositions = self.panel.configuration.supportedPositions
 
-        if self.isMovingTowardsLeadingEdge && supportedPositions.contains(.leadingBottom) {
+        if self.isMovingTowardsLeadingEdge, supportedPositions.contains(.leadingBottom) {
             return .leadingBottom
         }
 
-        if self.isMovingTowardsTrailingEdge && supportedPositions.contains(.trailingBottom) {
+        if self.isMovingTowardsTrailingEdge, supportedPositions.contains(.trailingBottom) {
             return .trailingBottom
         }
 
@@ -74,14 +64,14 @@ public final class PanelRepositionContext {
 // MARK: - Private
 
 private extension PanelRepositionContext {
-
     func normalized(_ value: CGFloat) -> CGFloat {
-        return (self.parentView.isRTL ? -1.0 : 1.0) * value
+        (self.parentView.isRTL ? -1.0 : 1.0) * value
     }
 
     var projectedOffset: CGFloat {
         // Inspired by: https://medium.com/ios-os-x-development/gestures-in-fluid-interfaces-on-intent-and-projection-36d158db7395
-        func project(_ velocity: CGFloat, onto position: CGFloat, decelerationRate: UIScrollView.DecelerationRate = .normal) -> CGFloat {
+        func project(_ velocity: CGFloat, onto position: CGFloat,
+                     decelerationRate: UIScrollView.DecelerationRate = .normal) -> CGFloat {
             let factor = -1.0 / (1000.0 * log(decelerationRate.rawValue))
             return position + factor * velocity
         }
@@ -114,6 +104,6 @@ private extension PanelRepositionContext {
     var hidingTreshold: CGFloat {
         // An approximation of how the Slide Over mode on iPad hides the panel:
         // - The panel is moved at least 1/3 of its width towards the edge of the screen
-        return self.originalFrame.width / 3.0
+        self.originalFrame.width / 3.0
     }
 }

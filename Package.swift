@@ -12,12 +12,12 @@ let package = Package(name: "PanelUI",
                                    targets: ["PanelUI"])
                       ],
                       dependencies: [
-                        .package(url: "https://github.com/IdeasOnCanvas/Aiolos.git", from: "1.4.0")
+                          .package(url: "https://github.com/IdeasOnCanvas/Aiolos.git", from: "1.4.0")
                       ],
                       targets: [
                           .target(name: "PanelUI",
                                   dependencies: [
-                                    "Aiolos"
+                                      "Aiolos"
                                   ]),
                           .testTarget(name: "PanelUITests",
                                       dependencies: ["PanelUI"])

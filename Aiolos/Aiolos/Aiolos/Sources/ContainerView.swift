@@ -1,17 +1,7 @@
-//
-//  ContainerView.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 13/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Internal class that is used as a Container for the Panel
 final class ContainerView: UIView {
-
     // MARK: - Lifecycle
 
     init(configuration: Panel.Configuration) {
@@ -19,6 +9,7 @@ final class ContainerView: UIView {
         self.configure(with: configuration)
     }
 
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

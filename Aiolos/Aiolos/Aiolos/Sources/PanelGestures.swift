@@ -1,25 +1,17 @@
-//
-//  PanelGestures.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 14/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
 
 // swiftlint:disable file_length
 
 /// Manages Gestures added to the Panel
 final class PanelGestures: NSObject {
-
     private unowned let panel: Panel
 
     private lazy var horizontalPan: HorizontalPanGestureRecognizer = self.makeHorizontalPanGestureRecognizer()
     private lazy var horizontalHandler: HorizontalHandler = .init(gestures: self)
     private lazy var verticalPan: NoDelayPanGestureRecognizer = self.makeVerticalPanGestureRecognizer()
     private lazy var verticalPanState: VerticalGestureState = .init(handler: self.verticalHandler)
-    private lazy var verticalPointerScroll: PointerScrollGestureRecognizer? = self.makeVerticalPointerScrollGestureRecognizer()
+    private lazy var verticalPointerScroll: PointerScrollGestureRecognizer? = self
+        .makeVerticalPointerScrollGestureRecognizer()
     private lazy var verticalPointerScrollState: VerticalGestureState = .init(handler: self.verticalHandler)
     private lazy var verticalHandler: VerticalHandler = .init(gestures: self)
 
@@ -65,7 +57,6 @@ final class PanelGestures: NSObject {
 // MARK: - UIGestureRecognizerDelegate
 
 extension PanelGestures: UIGestureRecognizerDelegate {
-
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let shouldBegin = self.panel.gestureDelegate?.gestureRecognizerShouldBegin?(gestureRecognizer) {
             return shouldBegin
@@ -81,21 +72,25 @@ extension PanelGestures: UIGestureRecognizerDelegate {
         }
     }
 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let shouldRecognize = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let shouldRecognize = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer,
+                                                                                shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
             return shouldRecognize
         }
 
         return true
     }
 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         // horizontal and vertical pan (or pointer scroll) should not happen together
         if gestureRecognizer == self.horizontalPan {
             return otherGestureRecognizer == self.verticalPan || otherGestureRecognizer == self.verticalPointerScroll
         }
 
-        if let shouldRequireFailureOf = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer, shouldRequireFailureOf: otherGestureRecognizer) {
+        if let shouldRequireFailureOf = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer,
+                                                                                       shouldRequireFailureOf: otherGestureRecognizer) {
             return shouldRequireFailureOf
         }
 
@@ -106,8 +101,10 @@ extension PanelGestures: UIGestureRecognizerDelegate {
         return false
     }
 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let shouldBeRequiredToFailBy = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer, shouldBeRequiredToFailBy: otherGestureRecognizer) {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let shouldBeRequiredToFailBy = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer,
+                                                                                         shouldBeRequiredToFailBy: otherGestureRecognizer) {
             return shouldBeRequiredToFailBy
         }
 
@@ -115,7 +112,8 @@ extension PanelGestures: UIGestureRecognizerDelegate {
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive press: UIPress) -> Bool {
-        if let shouldReceivePress = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer, shouldReceive: press) {
+        if let shouldReceivePress = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer,
+                                                                                   shouldReceive: press) {
             return shouldReceivePress
         }
 
@@ -123,7 +121,8 @@ extension PanelGestures: UIGestureRecognizerDelegate {
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        if let shouldReceiveTouch = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer, shouldReceive: touch) {
+        if let shouldReceiveTouch = self.panel.gestureDelegate?.gestureRecognizer?(gestureRecognizer,
+                                                                                   shouldReceive: touch) {
             return shouldReceiveTouch
         }
 
@@ -134,13 +133,11 @@ extension PanelGestures: UIGestureRecognizerDelegate {
 // MARK: - Private
 
 private extension PanelGestures {
-
     // MARK: - HorizontalHandler
 
     final class HorizontalHandler {
-
         private unowned let gestures: PanelGestures
-        private var panel: Panel { return self.gestures.panel }
+        private var panel: Panel { self.gestures.panel }
 
         init(gestures: PanelGestures) {
             self.gestures = gestures
@@ -180,7 +177,7 @@ private extension PanelGestures {
             guard let parentView = self.panel.parent?.view else { return }
 
             func dragOffset(for translation: CGPoint, moveAllowed: Bool) -> CGFloat {
-                return moveAllowed ? translation.x : translation.x / 3.0
+                moveAllowed ? translation.x : translation.x / 3.0
             }
 
             let translation = pan.translation(in: parentView)
@@ -191,14 +188,17 @@ private extension PanelGestures {
             let xOffset = dragOffset(for: translation, moveAllowed: moveAllowed)
             guard xOffset != 0.0 else { return }
 
-            self.panel.animator.performWithoutAnimation { self.panel.view.transform = CGAffineTransform(translationX: xOffset, y: 0.0) }
+            self.panel.animator
+                .performWithoutAnimation { self.panel.view.transform = CGAffineTransform(translationX: xOffset, y: 0.0)
+                }
         }
 
         private func handlePanEnded(_ pan: UIPanGestureRecognizer) {
             guard let context = self.repositionContext(pan: pan) else { return }
 
             var instruction = self.panel.animator.notifyDelegateOfMove(to: self.panel.view.frame, context: context)
-            if case .hide = instruction, let repositionDelegate = self.panel.repositionDelegate, repositionDelegate.panelCanBeDismissed(self.panel) == false {
+            if case .hide = instruction, let repositionDelegate = self.panel.repositionDelegate,
+               repositionDelegate.panelCanBeDismissed(self.panel) == false {
                 instruction = .none
             }
 
@@ -249,10 +249,12 @@ private extension PanelGestures {
             let offset = pan.translation(in: parentView).x
             let velocity = pan.velocity(in: parentView).x
 
-            return PanelRepositionContext(panel: self.panel, parentView: parentView, originalFrame: originalFrame, offset: offset, velocity: velocity)
+            return PanelRepositionContext(panel: self.panel, parentView: parentView, originalFrame: originalFrame,
+                                          offset: offset, velocity: velocity)
         }
 
-        private func initialVelocity(with context: PanelRepositionContext, targetPosition: Panel.Configuration.Position) -> CGFloat {
+        private func initialVelocity(with context: PanelRepositionContext,
+                                     targetPosition: Panel.Configuration.Position) -> CGFloat {
             let originalPosition = self.panel.configuration.position
             let targetOffset = self.panel.horizontalOffset(at: targetPosition)
 
@@ -279,7 +281,8 @@ private extension PanelGestures {
                 self.panel.animator.performWithoutAnimation {
                     self.panel.view.transform = .identity
                     self.panel.constraints.updateForHorizontalPanEndAnimationCompleted()
-                    self.panel.constraints.updatePositionConstraints(for: targetPosition, margins: self.panel.configuration.margins)
+                    self.panel.constraints.updatePositionConstraints(for: targetPosition,
+                                                                     margins: self.panel.configuration.margins)
                 }
             })
         }
@@ -302,9 +305,7 @@ private extension PanelGestures {
     }
 }
 
-
 private extension PanelGestures {
-
     typealias PanOrScrollGestureRecognizer = UIGestureRecognizer & PanGestureRecognizer
 
     enum StartMode: Equatable {
@@ -312,7 +313,7 @@ private extension PanelGestures {
         case onVerticallyScrollableArea(competingScrollView: UIScrollView)
     }
 
-    struct Constants {
+    enum Constants {
         static let minTranslation: CGFloat = 5.0
     }
 
@@ -320,7 +321,6 @@ private extension PanelGestures {
 
     /// Handles NoDelayPanGestureRecognizer and PointerScrollGestureRecognizer and provides them with state
     final class VerticalGestureState {
-
         private unowned let handler: VerticalHandler
         private var initialPoint: CGPoint?
         private var currentPoint: CGPoint?
@@ -401,9 +401,8 @@ private extension PanelGestures {
     // MARK: - VerticalHandler
 
     final class VerticalHandler {
-
         private unowned let gestures: PanelGestures
-        private var panel: Panel { return self.gestures.panel }
+        private var panel: Panel { self.gestures.panel }
         private var originalConfiguration: PanelGestures.Configuration?
 
         init(gestures: PanelGestures) {
@@ -412,9 +411,11 @@ private extension PanelGestures {
 
         func shouldStartPan(_ pan: UIGestureRecognizer) -> Bool {
             let gestureResizingMode = self.panel.configuration.gestureResizingMode
-            if pan == self.gestures.verticalPan && gestureResizingMode.contains(.byTouch) == false { return false }
-            if pan == self.gestures.verticalPointerScroll && gestureResizingMode.contains(.byPointerScroll) == false { return false }
-            guard let contentViewController = self.panel.contentViewController else { return gestureResizingMode.contains(.handle) }
+            if pan == self.gestures.verticalPan, gestureResizingMode.contains(.byTouch) == false { return false }
+            if pan == self.gestures.verticalPointerScroll,
+               gestureResizingMode.contains(.byPointerScroll) == false { return false }
+            guard let contentViewController = self.panel.contentViewController
+            else { return gestureResizingMode.contains(.handle) }
 
             let isWithinContentArea = self.gestures.gestureRecognizer(pan, isWithinContentAreaOf: contentViewController)
             guard isWithinContentArea else { return gestureResizingMode.contains(.handle) }
@@ -438,12 +439,15 @@ private extension PanelGestures {
         }
 
         private func handlePanStarted(_ pan: PanOrScrollGestureRecognizer, state: VerticalGestureState) {
-            let configuration = PanelGestures.Configuration(mode: self.panel.configuration.mode, animateChanges: self.panel.animator.animateChanges)
+            let configuration = PanelGestures.Configuration(mode: self.panel.configuration.mode,
+                                                            animateChanges: self.panel.animator.animateChanges)
             // remember initial state
             self.originalConfiguration = configuration
 
             if let contentViewController = self.panel.contentViewController {
-                if self.gestures.gestureRecognizer(pan, isWithinContentAreaOf: contentViewController), let scrollView = self.gestures.verticallyScrollableView(of: contentViewController, interactingWith: pan) {
+                if self.gestures.gestureRecognizer(pan, isWithinContentAreaOf: contentViewController),
+                   let scrollView = self.gestures.verticallyScrollableView(of: contentViewController,
+                                                                           interactingWith: pan) {
                     state.startMode = .onVerticallyScrollableArea(competingScrollView: scrollView)
                 } else {
                     state.startMode = .onFixedArea
@@ -483,13 +487,15 @@ private extension PanelGestures {
         private func handlePanChanged(_ pan: PanOrScrollGestureRecognizer, state: VerticalGestureState) {
             func dragOffset(for translation: CGPoint) -> CGFloat {
                 let fudgeFactor: CGFloat = 60.0
-                let minSupportedMode: Panel.Configuration.Mode = self.panel.configuration.supportedModes.contains(.compact) ? .compact : .expanded
+                let minSupportedMode: Panel.Configuration.Mode = self.panel.configuration.supportedModes
+                    .contains(.compact) ? .compact : .expanded
                 let minHeight = self.height(for: minSupportedMode) + fudgeFactor
                 let maxHeight = self.panel.constraints.maxHeight - fudgeFactor
                 let currentHeight = self.panel.currentHeight
 
                 // slow down resizing if the current height exceeds certain limits
-                let isNearingEdge = (currentHeight < minHeight && translation.y > 0.0) || (currentHeight > maxHeight && translation.y < 0.0)
+                let isNearingEdge = (currentHeight < minHeight && translation.y > 0.0) ||
+                    (currentHeight > maxHeight && translation.y < 0.0)
                 if isNearingEdge {
                     return translation.y / 3.0
                 } else {
@@ -505,12 +511,14 @@ private extension PanelGestures {
             pan.setTranslation(.zero, in: self.panel.view)
 
             // However, didPan still works with totalTranslation under the covers
-            if state.didPan && pan.cancelsTouchesInView == false {
+            if state.didPan, pan.cancelsTouchesInView == false {
                 guard self.handlePanDragStart(pan, state: state) else { return }
             }
 
             self.panel.animator.performWithoutAnimation { self.panel.constraints.updateForPan(with: yOffset) }
-            self.panel.animator.notifyDelegateOfTransition(to: CGSize(width: self.panel.view.frame.width, height: self.panel.currentHeight))
+            self.panel.animator
+                .notifyDelegateOfTransition(to: CGSize(width: self.panel.view.frame.width,
+                                                       height: self.panel.currentHeight))
         }
 
         private func handlePanEnded(_ pan: PanOrScrollGestureRecognizer, state: VerticalGestureState) {
@@ -543,7 +551,8 @@ private extension PanelGestures {
         }
 
         // swiftlint:disable:next cyclomatic_complexity
-        private func targetMode(for pan: PanOrScrollGestureRecognizer, state: VerticalGestureState) -> Panel.Configuration.Mode {
+        private func targetMode(for pan: PanOrScrollGestureRecognizer, state: VerticalGestureState) -> Panel
+        .Configuration.Mode {
             let supportedModes = self.panel.configuration.supportedModes
             guard let originalConfiguration = self.originalConfiguration else { return supportedModes.first! }
 
@@ -558,32 +567,35 @@ private extension PanelGestures {
             let isMovingDownwards = velocity > minVelocity
 
             // expand to .compact if we "tap" on .minimal
-            if isMovingUpwards == false && isMovingDownwards == false && originalConfiguration.mode == .minimal && currentHeight < heightCompact && supportedModes.contains(.compact) {
+            if isMovingUpwards == false, isMovingDownwards == false, originalConfiguration.mode == .minimal,
+               currentHeight < heightCompact, supportedModes.contains(.compact) {
                 return .compact
             }
             // .minimal is only allowed when moving downwards from .compact
-            if isMovingDownwards && originalConfiguration.mode == .compact && currentHeight < heightCompact && supportedModes.contains(.minimal) {
+            if isMovingDownwards, originalConfiguration.mode == .compact, currentHeight < heightCompact,
+               supportedModes.contains(.minimal) {
                 return .minimal
             }
             // if we move up from .minimal we have a higher threshold for .expanded and prefer .compact
-            if isMovingUpwards && originalConfiguration.mode == .minimal && currentHeight < heightCompact + 40.0 && supportedModes.contains(.compact) {
+            if isMovingUpwards, originalConfiguration.mode == .minimal, currentHeight < heightCompact + 40.0,
+               supportedModes.contains(.compact) {
                 return .compact
             }
             // moving upwards + current size > .expanded -> grow to .fullHeight
-            if isMovingUpwards && currentHeight >= heightExpanded && supportedModes.contains(.fullHeight) {
+            if isMovingUpwards, currentHeight >= heightExpanded, supportedModes.contains(.fullHeight) {
                 return .fullHeight
             }
             // moving downwards + current size < .expanded -> shrink to .compact
-            if isMovingDownwards && currentHeight <= heightExpanded && supportedModes.contains(.compact) {
+            if isMovingDownwards, currentHeight <= heightExpanded, supportedModes.contains(.compact) {
                 return .compact
             }
             // moving upwards + current size < .expanded -> grow to .expanded/.fullHeight
-            if isMovingUpwards && currentHeight <= heightExpanded {
+            if isMovingUpwards, currentHeight <= heightExpanded {
                 if supportedModes.contains(.expanded) { return .expanded }
                 if supportedModes.contains(.fullHeight) { return .fullHeight }
             }
             // moving downwards + current size > .expanded -> shrink to .compact/.expanded
-            if isMovingDownwards && currentHeight >= heightExpanded {
+            if isMovingDownwards, currentHeight >= heightExpanded {
                 switch state.startMode {
                 case .onFixedArea:
                     if supportedModes.contains(.expanded) { return .expanded }
@@ -596,9 +608,9 @@ private extension PanelGestures {
             // no "movement velocity", check distance from .expanded mode
             let diffToExpanded = currentHeight - heightExpanded
 
-            if diffToExpanded > offset && supportedModes.contains(.fullHeight) {
+            if diffToExpanded > offset, supportedModes.contains(.fullHeight) {
                 return .fullHeight
-            } else if diffToExpanded < -offset && supportedModes.contains(.compact) {
+            } else if diffToExpanded < -offset, supportedModes.contains(.compact) {
                 return .compact
             } else if supportedModes.contains(.expanded) {
                 return .expanded
@@ -625,7 +637,8 @@ private extension PanelGestures {
             }
         }
 
-        private func initialVelocity(for pan: PanOrScrollGestureRecognizer, targetMode: Panel.Configuration.Mode) -> CGFloat {
+        private func initialVelocity(for pan: PanOrScrollGestureRecognizer,
+                                     targetMode: Panel.Configuration.Mode) -> CGFloat {
             let velocity = pan.velocity(in: self.panel.view).y
             let currentHeight = self.panel.currentHeight
             let targetHeight = self.height(for: targetMode)
@@ -663,7 +676,6 @@ private extension PanelGestures {
 }
 
 private extension PanelGestures {
-
     struct Configuration {
         let mode: Panel.Configuration.Mode
         let animateChanges: Bool
@@ -674,16 +686,18 @@ private extension PanelGestures {
         let stiffness: CGFloat
         let damping: CGFloat
 
-        static let springy: Animation = Animation(mass: 6.0, stiffness: 2400.0, damping: 195.0)
-        static let overdamped: Animation = Animation(mass: 6.0, stiffness: 2400.0, damping: 250.0)
+        static let springy = Animation(mass: 6.0, stiffness: 2400.0, damping: 195.0)
+        static let overdamped = Animation(mass: 6.0, stiffness: 2400.0, damping: 250.0)
 
         func makeTiming(with velocity: CGFloat) -> UISpringTimingParameters {
-            return UISpringTimingParameters(mass: self.mass, stiffness: self.stiffness, damping: self.damping, initialVelocity: CGVector(dx: velocity, dy: velocity))
+            UISpringTimingParameters(mass: self.mass, stiffness: self.stiffness, damping: self.damping,
+                                     initialVelocity: CGVector(dx: velocity, dy: velocity))
         }
     }
 
     func makeHorizontalPanGestureRecognizer() -> HorizontalPanGestureRecognizer {
-        let pan = HorizontalPanGestureRecognizer(target: self.horizontalHandler, action: #selector(HorizontalHandler.handlePan))
+        let pan = HorizontalPanGestureRecognizer(target: self.horizontalHandler,
+                                                 action: #selector(HorizontalHandler.handlePan))
         pan.delegate = self
         pan.cancelsTouchesInView = true
         pan.detectsPointerScrolling = true
@@ -691,14 +705,16 @@ private extension PanelGestures {
     }
 
     func makeVerticalPointerScrollGestureRecognizer() -> PointerScrollGestureRecognizer? {
-        let gesture = PointerScrollGestureRecognizer.make(withTarget: self.verticalPointerScrollState, action: #selector(VerticalGestureState.handlePan))
+        let gesture = PointerScrollGestureRecognizer.make(withTarget: self.verticalPointerScrollState,
+                                                          action: #selector(VerticalGestureState.handlePan))
         gesture?.delegate = self
         gesture?.cancelsTouchesInView = false
         return gesture
     }
 
     func makeVerticalPanGestureRecognizer() -> NoDelayPanGestureRecognizer {
-        let pan = NoDelayPanGestureRecognizer(target: self.verticalPanState, action: #selector(VerticalGestureState.handlePan))
+        let pan = NoDelayPanGestureRecognizer(target: self.verticalPanState,
+                                              action: #selector(VerticalGestureState.handlePan))
         pan.delegate = self
         pan.cancelsTouchesInView = false
         return pan
@@ -718,18 +734,22 @@ private extension PanelGestures {
     }
 
     // allow pan gestures to be triggered within non-safe area on top (UINavigationBar)
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, isWithinContentAreaOf contentViewController: UIViewController) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           isWithinContentAreaOf contentViewController: UIViewController) -> Bool {
         let safeAreaTop: CGFloat = self.panel.size(for: .compact).height
-        
+
         let location = gestureRecognizer.location(in: self.panel.panelView)
         return location.y >= safeAreaTop
     }
 
     // allow pan gesture to be triggered when a) there's no scrollView or b) the scrollView can't be scrolled downwards
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, isAllowedToStartByContentOf contentViewController: UIViewController) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           isAllowedToStartByContentOf contentViewController: UIViewController) -> Bool {
         guard self.panel.configuration.gestureResizingMode.contains(.content) else { return false }
 
-        guard let enclosingScrollView = self.verticallyScrollableView(of: contentViewController, interactingWith: gestureRecognizer) else { return true }
+        guard let enclosingScrollView = self.verticallyScrollableView(of: contentViewController,
+                                                                      interactingWith: gestureRecognizer)
+        else { return true }
         // don't allow resizing gesture if textView is currently text editing
         if let textView = enclosingScrollView as? UITextView, textView.isFirstResponder {
             return false
@@ -738,7 +758,8 @@ private extension PanelGestures {
         return enclosingScrollView.isScrolledToTop
     }
 
-    func verticallyScrollableView(of contentViewController: UIViewController, interactingWith gestureRecognizer: UIGestureRecognizer) -> UIScrollView? {
+    func verticallyScrollableView(of contentViewController: UIViewController,
+                                  interactingWith gestureRecognizer: UIGestureRecognizer) -> UIScrollView? {
         let location = gestureRecognizer.location(in: contentViewController.view)
         guard let hitView = contentViewController.view.hitTest(location, with: nil) else { return nil }
 
@@ -747,7 +768,6 @@ private extension PanelGestures {
 }
 
 private extension UIView {
-
     func findFirstSuperview<T>(ofClass viewClass: T.Type, where predicate: (T) -> Bool) -> T? where T: UIView {
         var view: UIView? = self
         while view != nil {
@@ -763,9 +783,8 @@ private extension UIView {
 }
 
 private extension UIScrollView {
-
     var isScrolledToTop: Bool {
-        return self.contentOffset.y <= -self.contentInset.top
+        self.contentOffset.y <= -self.contentInset.top
     }
 
     var scrollsVertically: Bool {
@@ -777,7 +796,6 @@ private extension UIScrollView {
 }
 
 private extension UIGestureRecognizer {
-
     func cancel() {
         guard self.isEnabled else { return }
 
@@ -787,21 +805,19 @@ private extension UIGestureRecognizer {
 }
 
 private extension Panel {
-
     var currentHeight: CGFloat {
-        return self.constraints.heightConstraint!.constant
+        self.constraints.heightConstraint!.constant
     }
 }
 
 private extension CGPoint {
-
     enum Direction {
         case horizontal
         case vertical
     }
 
     func hypotenuse() -> CGFloat {
-        return sqrt(self.x * self.x + self.y * self.y)
+        sqrt(self.x * self.x + self.y * self.y)
     }
 
     func direction() -> Direction {

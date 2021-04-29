@@ -1,17 +1,7 @@
-//
-//  PanelAnimator.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 13/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Internal class used to drive animations of the Panel
 final class PanelAnimator {
-
     private unowned let panel: Panel
     private var animator: UIViewPropertyAnimator?
 
@@ -35,12 +25,14 @@ final class PanelAnimator {
         self.performChanges(changes, animated: shouldAnimate, timing: timing)
     }
 
-    func animateWithTiming(_ timing: UITimingCurveProvider, animations: @escaping () -> Void, completion: (() -> Void)? = nil) {
+    func animateWithTiming(_ timing: UITimingCurveProvider, animations: @escaping () -> Void,
+                           completion: (() -> Void)? = nil) {
         self.performChanges(animations, animated: true, timing: timing, completion: completion)
     }
 
     func performWithoutAnimation(_ changes: @escaping () -> Void) {
-        self.performChanges({ UIView.performWithoutAnimation(changes) }, animated: false, timing: UISpringTimingParameters())
+        self.performChanges({ UIView.performWithoutAnimation(changes) }, animated: false,
+                            timing: UISpringTimingParameters())
     }
 
     func stopCurrentAnimation() {
@@ -78,7 +70,8 @@ final class PanelAnimator {
         let transitionCoordinator = PanelTransitionCoordinator(animator: self, direction: .vertical)
         resizeDelegate.panel(self.panel, willTransitionFrom: oldMode, to: newMode, with: transitionCoordinator)
         if let contentViewController = self.panel.contentViewController as? PanelResizeDelegate {
-            contentViewController.panel(self.panel, willTransitionFrom: oldMode, to: newMode, with: transitionCoordinator)
+            contentViewController.panel(self.panel, willTransitionFrom: oldMode, to: newMode,
+                                        with: transitionCoordinator)
         }
     }
 
@@ -96,19 +89,22 @@ final class PanelAnimator {
         return repositionDelegate.panel(self.panel, willMoveTo: frame)
     }
 
-    func notifyDelegateOfMove(to endFrame: CGRect, context: PanelRepositionContext) -> PanelRepositionContext.Instruction {
+    func notifyDelegateOfMove(to endFrame: CGRect, context: PanelRepositionContext) -> PanelRepositionContext
+    .Instruction {
         guard let repositionDelegate = self.panel.repositionDelegate else { return .none }
         guard self.panel.isVisible else { return .none }
 
         return repositionDelegate.panel(self.panel, didStopMoving: endFrame, with: context)
     }
 
-    func notifyDelegateOfMove(from oldPosition: Panel.Configuration.Position, to newPosition: Panel.Configuration.Position) {
+    func notifyDelegateOfMove(from oldPosition: Panel.Configuration.Position,
+                              to newPosition: Panel.Configuration.Position) {
         guard let repositionDelegate = self.panel.repositionDelegate else { return }
         guard self.panel.isVisible else { return }
 
         let transitionCoordinator = PanelTransitionCoordinator(animator: self, direction: .horizontal)
-        repositionDelegate.panel(self.panel, willTransitionFrom: oldPosition, to: newPosition, with: transitionCoordinator)
+        repositionDelegate.panel(self.panel, willTransitionFrom: oldPosition, to: newPosition,
+                                 with: transitionCoordinator)
     }
 
     func notifyDelegateOfHide() {
@@ -123,7 +119,6 @@ final class PanelAnimator {
 // MARK: - Transitions
 
 extension PanelAnimator {
-
     func addToParent(with size: CGSize, transition: Panel.Transition, completion: @escaping () -> Void) {
         guard self.isMovingToParent == false else { return }
 
@@ -132,7 +127,8 @@ extension PanelAnimator {
         self.prepare(for: transition, size: size)
         self.performWithoutAnimation {
             self.panel.constraints.updateSizeConstraints(for: size)
-            self.panel.constraints.updatePositionConstraints(for: self.panel.configuration.position, margins: self.panel.configuration.margins)
+            self.panel.constraints.updatePositionConstraints(for: self.panel.configuration.position,
+                                                             margins: self.panel.configuration.margins)
         }
 
         self.notifyDelegateOfTransition(to: size)
@@ -149,7 +145,8 @@ extension PanelAnimator {
         self.isMovingFromParent = true
         self.stopCurrentAnimation()
 
-        let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration, timingParameters: UISpringTimingParameters())
+        let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration,
+                                              timingParameters: UISpringTimingParameters())
 
         func finish() {
             self.resetPanel()
@@ -207,8 +204,8 @@ extension PanelAnimator {
 // MARK: - Private
 
 private extension PanelAnimator {
-
-    func performChanges(_ changes: @escaping () -> Void, animated: Bool, timing: UITimingCurveProvider, completion: (() -> Void)? = nil) {
+    func performChanges(_ changes: @escaping () -> Void, animated: Bool, timing: UITimingCurveProvider,
+                        completion: (() -> Void)? = nil) {
         guard let parentView = self.panel.parent?.view else { return }
 
         let changesAndLayout = {
@@ -221,7 +218,8 @@ private extension PanelAnimator {
         parentView.layoutIfNeeded()
 
         if animated {
-            let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration, timingParameters: timing)
+            let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration,
+                                                  timingParameters: timing)
             animator.addAnimations(changesAndLayout)
             if let completion = completion {
                 animator.addCompletion { _ in completion() }
@@ -290,7 +288,8 @@ private extension PanelAnimator {
             self.manuallyCallQueuedAnimations()
             completion()
         case .fade, .slide:
-            let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration, timingParameters: UISpringTimingParameters())
+            let animator = UIViewPropertyAnimator(duration: Panel.Constants.Animation.duration,
+                                                  timingParameters: UISpringTimingParameters())
             animator.addAnimations(self.resetPanel)
             animator.addCompletion { _ in completion() }
             self.addQueuedAnimations(to: animator)

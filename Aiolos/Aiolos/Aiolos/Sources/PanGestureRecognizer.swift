@@ -1,18 +1,8 @@
-//
-//  PanGestureRecognizer.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 18/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Set of methods implemented by both UIPanGestureRecognizer and our own NoDelayPanGestureRecognizer
 @objc
 protocol PanGestureRecognizer: AnyObject {
-
     // We need the @objc annotations because of `typealias PanOrScrollGestureRecognizer = UIGestureRecognizer & PanGestureRecognizer` in PanelGestures
     // which makes the methods in our `NoDelayPanGestureRecognizer` to be called via objc bridging. If we don't have these annotations, we get crashes in runtime.
     @objc(translationInView:)
@@ -23,25 +13,22 @@ protocol PanGestureRecognizer: AnyObject {
     func velocity(in view: UIView?) -> CGPoint
 }
 
-extension UIPanGestureRecognizer: PanGestureRecognizer { }
-
+extension UIPanGestureRecognizer: PanGestureRecognizer {}
 
 // MARK: - PointerScrollGestureRecognizer
 
 /// A UIPanGestureRecognizer subclass that recognizes only pointer scroll gestures
 /// We won't need this after UIGestureRecognizer subclasses will be able to detect pointer scrolls (FB7733482)
 public final class PointerScrollGestureRecognizer: UIPanGestureRecognizer {
-
     // MARK: - Lifecycle
 
     /// As a non-failable initializer cannot be overwritten by a failable initializer, we mark this initializer as 'private' and use make() factory method from outside
-    private override init(target: Any?, action: Selector?) {
+    override private init(target: Any?, action: Selector?) {
         super.init(target: target, action: action)
     }
 }
 
 public extension PointerScrollGestureRecognizer {
-
     static func make(withTarget target: Any?, action: Selector?) -> PointerScrollGestureRecognizer? {
         guard #available(iOS 13.4, *), NSClassFromString("UIPointerInteraction") != nil else { return nil }
 
@@ -54,7 +41,6 @@ public extension PointerScrollGestureRecognizer {
 // MARK: - UIGestureRecognizer+Subclass
 
 public extension PointerScrollGestureRecognizer {
-
     @available(iOS 13.4, *)
     override func shouldReceive(_ event: UIEvent) -> Bool {
         guard event.type == .scroll else { return false }
@@ -63,12 +49,10 @@ public extension PointerScrollGestureRecognizer {
     }
 }
 
-
 // MARK: - NoDelayPanGestureRecognizer
 
 /// A UIGestureRecognizer subclass that recognizes pan gestures without any delay but doesn't recognize scrolling with pointer
 public final class NoDelayPanGestureRecognizer: UIGestureRecognizer {
-
     private lazy var panForVelocity: UIPanGestureRecognizer = self.makeVelocityPan()
     private var lastPoint: CGPoint?
     private var currentPoint: CGPoint?
@@ -77,7 +61,6 @@ public final class NoDelayPanGestureRecognizer: UIGestureRecognizer {
 // MARK: - UIGestureRecognizer+Subclass
 
 public extension NoDelayPanGestureRecognizer {
-
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
         self.panForVelocity.touchesBegan(touches, with: event)
@@ -136,7 +119,6 @@ public extension NoDelayPanGestureRecognizer {
 // MARK: - PanGestureRecognizer
 
 extension NoDelayPanGestureRecognizer: PanGestureRecognizer {
-
     func translation(in view: UIView?) -> CGPoint {
         guard let lastPoint = self.lastPoint else { return .zero }
         guard let currentPoint = self.currentPoint else { return .zero }
@@ -152,14 +134,13 @@ extension NoDelayPanGestureRecognizer: PanGestureRecognizer {
     }
 
     func velocity(in view: UIView?) -> CGPoint {
-        return self.panForVelocity.velocity(in: view)
+        self.panForVelocity.velocity(in: view)
     }
 }
 
 // MARK: - Private
 
 private extension NoDelayPanGestureRecognizer {
-
     func makeVelocityPan() -> UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: nil, action: nil)
         pan.cancelsTouchesInView = false

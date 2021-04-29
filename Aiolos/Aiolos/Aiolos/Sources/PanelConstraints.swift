@@ -1,17 +1,7 @@
-//
-//  PanelConstraints.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 13/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// Internal class used for managing NSLayoutConstraints of the Panel
 final class PanelConstraints {
-
     private unowned let panel: Panel
     private var isTransitioning: Bool = false
     private lazy var keyboardLayoutGuide: KeyboardLayoutGuide = self.makeKeyboardLayoutGuide()
@@ -48,31 +38,43 @@ final class PanelConstraints {
         guard let parentView = self.panel.parent?.view else { return }
 
         let anchors = self.guides(of: parentView, for: self.panel.configuration.positionLogic)
-        let topConstraint = view.topAnchor.constraint(greaterThanOrEqualTo: anchors.top, constant: margins.top).withIdentifier("Panel Top")
+        let topConstraint = view.topAnchor.constraint(greaterThanOrEqualTo: anchors.top, constant: margins.top)
+            .withIdentifier("Panel Top")
         var positionConstraints = [
-            view.bottomAnchor.constraint(equalTo: anchors.bottom, constant: -margins.bottom).configure { $0.priority = .defaultHigh; $0.identifier = "Panel Bottom" },
-            view.bottomAnchor.constraint(lessThanOrEqualTo: anchors.bottom, constant: -margins.bottom).withIdentifier("Panel Bottom <="),
-            view.bottomAnchor.constraint(lessThanOrEqualTo: self.keyboardLayoutGuide.topGuide.bottomAnchor, constant: -margins.bottom).withIdentifier("Keyboard Bottom"),
+            view.bottomAnchor.constraint(equalTo: anchors.bottom, constant: -margins.bottom)
+                .configure { $0.priority = .defaultHigh
+                    $0.identifier = "Panel Bottom"
+                },
+            view.bottomAnchor.constraint(lessThanOrEqualTo: anchors.bottom, constant: -margins.bottom)
+                .withIdentifier("Panel Bottom <="),
+            view.bottomAnchor.constraint(lessThanOrEqualTo: self.keyboardLayoutGuide.topGuide.bottomAnchor,
+                                         constant: -margins.bottom).withIdentifier("Keyboard Bottom"),
             topConstraint
         ]
 
         switch position {
         case .bottom:
             positionConstraints += [
-                view.leadingAnchor.constraint(equalTo: anchors.leading, constant: margins.leading).withIdentifier("Panel Leading"),
-                view.trailingAnchor.constraint(equalTo: anchors.trailing, constant: -margins.trailing).withIdentifier("Panel Trailing")
+                view.leadingAnchor.constraint(equalTo: anchors.leading, constant: margins.leading)
+                    .withIdentifier("Panel Leading"),
+                view.trailingAnchor.constraint(equalTo: anchors.trailing, constant: -margins.trailing)
+                    .withIdentifier("Panel Trailing")
             ]
 
         case .leadingBottom:
             positionConstraints += [
-                view.leadingAnchor.constraint(equalTo: anchors.leading, constant: margins.leading).withIdentifier("Panel Leading"),
-                view.trailingAnchor.constraint(lessThanOrEqualTo: anchors.trailing, constant: -margins.trailing).withIdentifier("Panel Trailing")
+                view.leadingAnchor.constraint(equalTo: anchors.leading, constant: margins.leading)
+                    .withIdentifier("Panel Leading"),
+                view.trailingAnchor.constraint(lessThanOrEqualTo: anchors.trailing, constant: -margins.trailing)
+                    .withIdentifier("Panel Trailing")
             ]
 
         case .trailingBottom:
             positionConstraints += [
-                view.leadingAnchor.constraint(greaterThanOrEqualTo: anchors.leading, constant: margins.leading).withIdentifier("Panel Leading"),
-                view.trailingAnchor.constraint(equalTo: anchors.trailing, constant: -margins.trailing).withIdentifier("Panel Trailing")
+                view.leadingAnchor.constraint(greaterThanOrEqualTo: anchors.leading, constant: margins.leading)
+                    .withIdentifier("Panel Leading"),
+                view.trailingAnchor.constraint(equalTo: anchors.trailing, constant: -margins.trailing)
+                    .withIdentifier("Panel Trailing")
             ]
         }
 
@@ -89,7 +91,6 @@ final class PanelConstraints {
 // MARK: - Internal (Dragging Support)
 
 internal extension PanelConstraints {
-
     var safeArea: CGRect {
         guard let parentView = self.panel.parent?.view else { return .zero }
 
@@ -111,7 +112,7 @@ internal extension PanelConstraints {
     }
 
     var maxHeight: CGFloat {
-        return self.panel.view.frame.maxY - self.safeArea.minY
+        self.panel.view.frame.maxY - self.safeArea.minY
     }
 
     func updateForPanStart(with currentSize: CGSize) {
@@ -160,7 +161,6 @@ internal extension PanelConstraints {
 // MARK: - Private
 
 private extension PanelConstraints {
-
     struct Guides {
         let top: NSLayoutYAxisAnchor
         let leading: NSLayoutXAxisAnchor
@@ -175,27 +175,34 @@ private extension PanelConstraints {
     }
 
     func activateSizeConstraints(for size: CGSize) {
-        let widthConstraint = self.panel.view.widthAnchor.constraint(equalToConstant: size.width).configure { constraint in
-            constraint.identifier = "Panel Width"
-            constraint.priority = .defaultHigh
-        }
+        let widthConstraint = self.panel.view.widthAnchor.constraint(equalToConstant: size.width)
+            .configure { constraint in
+                constraint.identifier = "Panel Width"
+                constraint.priority = .defaultHigh
+            }
 
-        let minHeightConstraint = self.panel.view.heightAnchor.constraint(greaterThanOrEqualToConstant: ResizeHandle.Constants.height).withIdentifier("Panel Min Height")
-        let heightConstraint = self.panel.view.heightAnchor.constraint(equalToConstant: size.height).configure { constraint in
-            constraint.identifier = "Panel Height"
-            constraint.priority = .defaultHigh
-        }
+        let minHeightConstraint = self.panel.view.heightAnchor
+            .constraint(greaterThanOrEqualToConstant: ResizeHandle.Constants.height).withIdentifier("Panel Min Height")
+        let heightConstraint = self.panel.view.heightAnchor.constraint(equalToConstant: size.height)
+            .configure { constraint in
+                constraint.identifier = "Panel Height"
+                constraint.priority = .defaultHigh
+            }
 
         self.widthConstraint = widthConstraint
         self.heightConstraint = heightConstraint
         NSLayoutConstraint.activate([widthConstraint, heightConstraint, minHeightConstraint])
     }
 
-    func guides(of view: UIView, for positionLogic: [Panel.Configuration.Edge: Panel.Configuration.PositionLogic]) -> Guides {
+    func guides(of view: UIView,
+                for positionLogic: [Panel.Configuration.Edge: Panel.Configuration.PositionLogic]) -> Guides {
         let top = positionLogic[.top] == .respectSafeArea ? view.safeAreaLayoutGuide.topAnchor : view.topAnchor
-        let leading = positionLogic[.leading] == .respectSafeArea ? view.safeAreaLayoutGuide.leadingAnchor : view.leadingAnchor
-        let bottom = positionLogic[.bottom] == .respectSafeArea ? view.safeAreaLayoutGuide.bottomAnchor : view.bottomAnchor
-        let trailing = positionLogic[.trailing] == .respectSafeArea ? view.safeAreaLayoutGuide.trailingAnchor : view.trailingAnchor
+        let leading = positionLogic[.leading] == .respectSafeArea ? view.safeAreaLayoutGuide.leadingAnchor : view
+            .leadingAnchor
+        let bottom = positionLogic[.bottom] == .respectSafeArea ? view.safeAreaLayoutGuide.bottomAnchor : view
+            .bottomAnchor
+        let trailing = positionLogic[.trailing] == .respectSafeArea ? view.safeAreaLayoutGuide.trailingAnchor : view
+            .trailingAnchor
 
         return .init(top: top, leading: leading, bottom: bottom, trailing: trailing)
     }
@@ -214,14 +221,13 @@ private extension PanelConstraints {
 // MARK: - NSLayoutConstraint
 
 private extension NSLayoutConstraint {
-
     func configure(_ configuration: (NSLayoutConstraint) -> Void) -> NSLayoutConstraint {
         configuration(self)
         return self
     }
 
     func withIdentifier(_ identifier: String) -> NSLayoutConstraint {
-        return self.configure { constraint in
+        self.configure { constraint in
             constraint.identifier = identifier
         }
     }
@@ -230,7 +236,6 @@ private extension NSLayoutConstraint {
 // MARK: - UIEdgeInsets
 
 private extension UIEdgeInsets {
-
     init(directionalEdgeInsets: NSDirectionalEdgeInsets, isRTL: Bool) {
         let left = isRTL ? directionalEdgeInsets.trailing : directionalEdgeInsets.leading
         let right = isRTL ? directionalEdgeInsets.leading : directionalEdgeInsets.trailing

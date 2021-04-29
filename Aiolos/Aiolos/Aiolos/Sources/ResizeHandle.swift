@@ -1,18 +1,8 @@
-//
-//  ResizeHandle.swift
-//  Aiolos
-//
-//  Created by Matthias Tretter on 18/07/2017.
-//  Copyright © 2017 Matthias Tretter. All rights reserved.
-//
-
 import UIKit
-
 
 /// View that is used to display the resize handle
 public final class ResizeHandle: UIView {
-
-    public struct Constants {
+    public enum Constants {
         public static let height: CGFloat = 20.0
 
         fileprivate static let handleHeight: CGFloat = 5.0
@@ -63,6 +53,7 @@ public final class ResizeHandle: UIView {
         }
     }
 
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -77,20 +68,21 @@ public final class ResizeHandle: UIView {
     // MARK: - ResizeHandle
 
     func configure(with configuration: Panel.Configuration) {
-        guard case .visible(let foregroundColor, let backgroundColor) = configuration.appearance.resizeHandle else { return }
+        guard case .visible(let foregroundColor, let backgroundColor) = configuration.appearance.resizeHandle
+        else { return }
 
         self.handleColor = foregroundColor
         self.backgroundColor = backgroundColor
-        self.resizeHandle.alpha = configuration.gestureResizingMode.contains(.handle) && configuration.supportedModes.count > 1 ? 1.0 : 0.2
+        self.resizeHandle.alpha = configuration.gestureResizingMode.contains(.handle) && configuration.supportedModes
+            .count > 1 ? 1.0 : 0.2
     }
 }
 
 // MARK: - UIAccessibility
 
-extension ResizeHandle {
-
-    override public func accessibilityActivate() -> Bool {
-        return self.accessibilityActivateAction?() ?? false
+public extension ResizeHandle {
+    override func accessibilityActivate() -> Bool {
+        self.accessibilityActivateAction?() ?? false
     }
 }
 
@@ -98,20 +90,23 @@ extension ResizeHandle {
 
 @available(iOS 13.4, *)
 extension ResizeHandle: UIPointerInteractionDelegate {
-
-    public func pointerInteraction(_ interaction: UIPointerInteraction, regionFor request: UIPointerRegionRequest, defaultRegion: UIPointerRegion) -> UIPointerRegion? {
-        return UIPointerRegion(rect: self.resizeHandle.frame.insetBy(dx: -24.0, dy: -12.0))
-      }
-
-    public func pointerInteraction(_ interaction: UIPointerInteraction, styleFor region: UIPointerRegion) -> UIPointerStyle? {
-        return UIPointerStyle(effect: .automatic(UITargetedPreview(view: self.resizeHandle)))
+    public func pointerInteraction(_ interaction: UIPointerInteraction, regionFor request: UIPointerRegionRequest,
+                                   defaultRegion: UIPointerRegion) -> UIPointerRegion? {
+        UIPointerRegion(rect: self.resizeHandle.frame.insetBy(dx: -24.0, dy: -12.0))
     }
 
-    public func pointerInteraction(_ interaction: UIPointerInteraction, willEnter region: UIPointerRegion, animator: UIPointerInteractionAnimating) {
+    public func pointerInteraction(_ interaction: UIPointerInteraction,
+                                   styleFor region: UIPointerRegion) -> UIPointerStyle? {
+        UIPointerStyle(effect: .automatic(UITargetedPreview(view: self.resizeHandle)))
+    }
+
+    public func pointerInteraction(_ interaction: UIPointerInteraction, willEnter region: UIPointerRegion,
+                                   animator: UIPointerInteractionAnimating) {
         self.isResizing = true
     }
 
-    public func pointerInteraction(_ interaction: UIPointerInteraction, willExit region: UIPointerRegion, animator: UIPointerInteractionAnimating) {
+    public func pointerInteraction(_ interaction: UIPointerInteraction, willExit region: UIPointerRegion,
+                                   animator: UIPointerInteractionAnimating) {
         self.isResizing = false
     }
 }
@@ -119,9 +114,10 @@ extension ResizeHandle: UIPointerInteractionDelegate {
 // MARK: - Private
 
 private extension ResizeHandle {
-
     func makeResizeHandle() -> UIView {
-        let handle = UIView(frame: .init(origin: .zero, size: .init(width: Constants.inactiveHandleWidth, height: Constants.handleHeight)))
+        let handle =
+            UIView(frame: .init(origin: .zero,
+                                size: .init(width: Constants.inactiveHandleWidth, height: Constants.handleHeight)))
         handle.backgroundColor = self.handleColor
         return handle
     }
@@ -153,9 +149,7 @@ private extension ResizeHandle {
     }
 }
 
-
 private extension UIColor {
-
     func darkened() -> UIColor {
         var hue: CGFloat = 0.0
         var saturation: CGFloat = 0.0
@@ -168,10 +162,9 @@ private extension UIColor {
     }
 }
 
-
 private extension CGRect {
-
     init(center: CGPoint, size: CGSize) {
-        self.init(x: center.x - size.width / 2.0, y: center.y - size.height / 2.0, width: size.width, height: size.height)
+        self.init(x: center.x - size.width / 2.0, y: center.y - size.height / 2.0, width: size.width,
+                  height: size.height)
     }
 }

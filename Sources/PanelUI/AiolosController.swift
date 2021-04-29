@@ -6,9 +6,9 @@
 //  Copyright © 2017 Matthias Tretter. All rights reserved.
 //
 import Aiolos
-import UIKit
-import SwiftUI
 import Combine
+import SwiftUI
+import UIKit
 
 extension PanelState {
     var mode: Aiolos.Panel.Configuration.Mode {
@@ -21,22 +21,21 @@ extension PanelState {
     }
 }
 
-
 /// The RootViewController of the Demo
 class AiolosController<Content: View, PanelContent: View>: UIHostingController<Content> {
-
     private lazy var panelController: Aiolos.Panel = self.makePanelController()
 
     var panelContent: PanelContent? {
         didSet {
-            (panelController.contentViewController as? UIHostingController<PanelContent?>)?.rootView = self.panelContent
+            (self.panelController.contentViewController as? UIHostingController<PanelContent?>)?.rootView = self
+                .panelContent
         }
     }
 
     var headerHeight: CGFloat = 64 {
         didSet {
-            if oldValue != headerHeight {
-                panelController.reloadSize()
+            if oldValue != self.headerHeight {
+                self.panelController.reloadSize()
             }
         }
     }
@@ -48,7 +47,6 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
     var progressPublisher: CurrentValueSubject<Double, Never> = CurrentValueSubject(1)
 
     func apply(state: PanelState, content: PanelContent?) {
-
         var config = self.panelController.configuration
         config.mode = state.mode
 
@@ -62,26 +60,31 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
                 config.position = .trailingBottom
             }
         }
-        if config.mode != self.panelController.configuration.mode || config.position != self.panelController.configuration.position {
+        if config.mode != self.panelController.configuration.mode || config.position != self.panelController
+            .configuration.position {
             DispatchQueue.main.async {
                 self.panelController.configuration = config
             }
         }
-        if state.isPresented != panelController.isVisible {
-                let transition: Aiolos.Panel.Transition = self.traitCollection.horizontalSizeClass == .regular ? .slide(direction: .horizontal) : .slide(direction: .vertical)
+        if state.isPresented != self.panelController.isVisible {
+            let transition: Aiolos.Panel.Transition = self.traitCollection
+                .horizontalSizeClass == .regular ? .slide(direction: .horizontal) : .slide(direction: .vertical)
 
-                if !state.isPresented {
-                    DispatchQueue.main.async {
-                        self.panelController.removeFromParent(transition: transition, completion: {
-                            self.panelContent = content
-                            self.state.state = .expanded
-                        })
-                    }
-                } else {
+            if !state.isPresented {
+                DispatchQueue.main.async {
+                    self.panelController.removeFromParent(transition: transition, completion: {
+                        self.panelContent = content
+                        self.state.state = .expanded
+                    })
+                }
+            } else {
+                DispatchQueue.main.async {
                     self.panelContent = content
-                    DispatchQueue.main.async {
-                        self.panelController.add(to: self, transition: transition)
-                    }
+                    self.panelController.add(to: self, transition: transition, completion: {
+//                        self.apply(state: state, content: content)
+                        self.panelController.reloadSize()
+                    })
+                }
             }
         }
 
@@ -97,28 +100,28 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
             }
             self.panelSafeArea.position = state.position
         }
-
     }
-
 
     init(rootView: Content, state: Binding<PanelState>) {
         self._state = state
         super.init(rootView: rootView)
     }
 
-    @objc required dynamic init?(coder aDecoder: NSCoder) {
+    @available(*, unavailable)
+    @objc dynamic required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - UIViewController
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
 //        self.view.isUserInteractionEnabled = false
-
     }
 
-    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+    override func willTransition(to newCollection: UITraitCollection,
+                                 with coordinator: UIViewControllerTransitionCoordinator) {
         let changes = newCollection.horizontalSizeClass != traitCollection.horizontalSizeClass
         super.willTransition(to: newCollection, with: coordinator)
 
@@ -132,14 +135,13 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
     }
 
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-        return [.bottom]
+        [.bottom]
     }
 
-
     func makePanelController() -> Aiolos.Panel {
-        let panelController = Aiolos.Panel(configuration: self.configuration(for: self.traitCollection, state: state))
+        let panelController = Aiolos
+            .Panel(configuration: self.configuration(for: self.traitCollection, state: self.state))
         let hosting = UIHostingController(rootView: panelContent)
-
 
         panelController.sizeDelegate = self
         panelController.resizeDelegate = self
@@ -150,9 +152,12 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
         return panelController
     }
 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let contentNavigationController = self.panelController.contentViewController as? UINavigationController else { return false }
-        guard let tableViewController = contentNavigationController.topViewController as? UITableViewController else { return false }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let contentNavigationController = self.panelController.contentViewController as? UINavigationController
+        else { return false }
+        guard let tableViewController = contentNavigationController.topViewController as? UITableViewController
+        else { return false }
 
         // Prevent swipes on the table view being triggered as the panel is being dragged horizontally
         // More info: https://github.com/IdeasOnCanvas/Aiolos/issues/23
@@ -161,8 +166,8 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
 }
 
 // MARK: - PanelSizeDelegate
-extension AiolosController: PanelSizeDelegate {
 
+extension AiolosController: PanelSizeDelegate {
     func panel(_ panel: Aiolos.Panel, sizeForMode mode: Aiolos.Panel.Configuration.Mode) -> CGSize {
         func panelWidth(for position: Aiolos.Panel.Configuration.Position) -> CGFloat {
             if position == .bottom { return 0.0 }
@@ -173,7 +178,9 @@ extension AiolosController: PanelSizeDelegate {
         let width = panelWidth(for: panel.configuration.position)
         switch mode {
         case .compact:
-            return CGSize(width: width, height: headerHeight)
+            let offset = self.traitCollection.horizontalSizeClass == .compact ? self.view.safeAreaInsets.bottom : 0
+            return CGSize(width: width,
+                          height: self.headerHeight + offset)
         case .fullHeight:
             return CGSize(width: width, height: 0.0)
         default:
@@ -183,8 +190,8 @@ extension AiolosController: PanelSizeDelegate {
 }
 
 // MARK: - PanelResizeDelegate
-extension AiolosController: PanelResizeDelegate {
 
+extension AiolosController: PanelResizeDelegate {
     func panelDidStartResizing(_ panel: Aiolos.Panel) {
         print("Panel did start resizing")
     }
@@ -198,10 +205,10 @@ extension AiolosController: PanelResizeDelegate {
         self.progressPublisher.send(Double(progress))
     }
 
-    func panel(_ panel: Aiolos.Panel, willTransitionFrom oldMode: Aiolos.Panel.Configuration.Mode?, to newMode: Aiolos.Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
+    func panel(_ panel: Aiolos.Panel, willTransitionFrom oldMode: Aiolos.Panel.Configuration.Mode?,
+               to newMode: Aiolos.Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
         print("Panel will transition from \(String(describing: oldMode)) to \(newMode)")
-        DispatchQueue.main.async {
-        }
+        DispatchQueue.main.async {}
         // we can animate things along the way
         switch newMode {
         case .fullHeight:
@@ -221,14 +228,14 @@ extension AiolosController: PanelResizeDelegate {
 }
 
 // MARK: - PanelRepositionDelegate
-extension AiolosController: PanelRepositionDelegate {
 
+extension AiolosController: PanelRepositionDelegate {
     func panelCanStartMoving(_ panel: Aiolos.Panel) -> Bool {
-        return self.traitCollection.horizontalSizeClass == .regular
+        self.traitCollection.horizontalSizeClass == .regular
     }
 
     func panelCanBeDismissed(_ panel: Aiolos.Panel) -> Bool {
-        return true
+        true
     }
 
     func panel(_ panel: Aiolos.Panel, willMoveTo frame: CGRect) -> Bool {
@@ -239,7 +246,8 @@ extension AiolosController: PanelRepositionDelegate {
         return true
     }
 
-    func panel(_ panel: Aiolos.Panel, didStopMoving endFrame: CGRect, with context: PanelRepositionContext) -> PanelRepositionContext.Instruction {
+    func panel(_ panel: Aiolos.Panel, didStopMoving endFrame: CGRect,
+               with context: PanelRepositionContext) -> PanelRepositionContext.Instruction {
         print("Panel did move to frame \(endFrame)")
 
         let panelShouldHide = context.isMovingPastLeadingEdge || context.isMovingPastTrailingEdge
@@ -248,11 +256,11 @@ extension AiolosController: PanelRepositionDelegate {
         return .updatePosition(context.targetPosition)
     }
 
-    func panel(_ panel: Aiolos.Panel, willTransitionFrom oldPosition: Aiolos.Panel.Configuration.Position, to newPosition: Aiolos.Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
+    func panel(_ panel: Aiolos.Panel, willTransitionFrom oldPosition: Aiolos.Panel.Configuration.Position,
+               to newPosition: Aiolos.Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
         print("Panel is transitioning from \(String(describing: oldPosition)) to position \(newPosition)")
 
-        DispatchQueue.main.async {
-        }
+        DispatchQueue.main.async {}
         switch newPosition {
         case .bottom:
             self.state.position = .center
@@ -284,10 +292,9 @@ extension AiolosController: PanelRepositionDelegate {
     }
 }
 
-
 // MARK: - Private
-private extension AiolosController {
 
+private extension AiolosController {
     func configuration(for traitCollection: UITraitCollection, state: PanelState) -> Aiolos.Panel.Configuration {
         var configuration = Aiolos.Panel.Configuration.default
 
@@ -306,16 +313,21 @@ private extension AiolosController {
         switch self.traitCollection.horizontalSizeClass {
         case .regular:
             configuration.supportedPositions = [.leadingBottom, .trailingBottom]
-            configuration.appearance.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            configuration.appearance.maskedCorners = [
+                .layerMinXMinYCorner,
+                .layerMaxXMinYCorner,
+                .layerMinXMaxYCorner,
+                .layerMaxXMaxYCorner
+            ]
         case .compact:
             configuration.supportedPositions = [.bottom]
             configuration.appearance.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            configuration.positionLogic[.bottom] = .ignoreSafeArea
         case .unspecified:
             break
         @unknown default:
             break
         }
-
 
         switch self.state.state {
         case .collapsed:
@@ -358,4 +370,10 @@ private extension AiolosController {
 //
 //        self.panelController.configuration.mode = nextMode
 //    }
+}
+
+private extension UITraitCollection {
+    var hasNotch: Bool {
+        UIApplication.shared.windows.contains(where: { $0.safeAreaInsets.bottom > 0 })
+    }
 }

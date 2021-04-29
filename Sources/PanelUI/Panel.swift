@@ -103,7 +103,7 @@ struct Panel<Content: View>: View {
                 .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 1)
                 .offset(y: offset)
                 .frame(height: max(height, 0))
-                .offset(x: horizontalProgress(for: dragState.x, in: proxy) * (proxy.size.width - width))
+                .offset(x: self.horizontalProgress(for: self.dragState.x, in: proxy) * (proxy.size.width - self.width))
                 .gesture(DragGesture(minimumDistance: 30, coordinateSpace: .local)
                     .updating($dragState) { value, state, _ in
                         state.update(offset: value.translation, with: sizeClass)
@@ -170,10 +170,9 @@ struct Panel<Content: View>: View {
         let endWidth = self.currentPosition == .leading
             ? offset
             : proxy.size.width + offset - self.width
-        let result =  (endWidth) / (proxy.size.width - self.width)
+        let result = endWidth / (proxy.size.width - self.width)
         print(result, endWidth, proxy.size.width, self.width, offset)
         return result
-
     }
 
     var ignoredEdges: Edge.Set {
@@ -187,7 +186,7 @@ struct Item: Identifiable {
 
 struct SlowView: View {
     var body: some View {
-        for _ in 0..<10000 {
+        for _ in 0 ..< 10000 {
             var i = pow(2, 2)
             i += 1
         }
@@ -254,7 +253,6 @@ struct Duration: View {
     }
 
     private static var trackLabelCache = [Int: String]()
-
 }
 
 struct ListScrollView: View {
@@ -266,10 +264,10 @@ struct ListScrollView: View {
         ScrollView {
             VStack {
                 TextField("trst", text: .constant("Test"))
-                Duration(x: $x, foo: { })
+                Duration(x: $x, foo: {})
                     .transition(AnyTransition.opacity.animation(.default)
                         .combined(with: AnyTransition.move(edge: .bottom)))
-                ForEach(0..<20) { _ in
+                ForEach(0 ..< 20) { _ in
 //                    SlowView()
                     Color.blue
                 }
@@ -283,6 +281,7 @@ struct ListScrollView: View {
         print("foo")
     }
 }
+
 public struct PanelUI_Previews: PreviewProvider {
     struct Header: View {
         @Environment(\.panelState) var state
@@ -325,9 +324,8 @@ public struct PanelUI_Previews: PreviewProvider {
 
         @State var item: Item? = Item(id: "Test")
 
-        public init() {
+        public init() {}
 
-        }
         public var body: some View {
             VStack {
                 Text("Top")
@@ -346,7 +344,7 @@ public struct PanelUI_Previews: PreviewProvider {
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.gray.edgesIgnoringSafeArea(.all))
-            .panel(item: $item) { item in
+            .panel(item: $item) { _ in
                 VStack(spacing: 0) {
                     Header()
                         .background(GeometryReader { proxy in
@@ -355,7 +353,6 @@ public struct PanelUI_Previews: PreviewProvider {
                         })
                     ListScrollView()
                     Text("end")
-
                 }
             }
         }
