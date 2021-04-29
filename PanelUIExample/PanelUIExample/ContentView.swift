@@ -13,10 +13,10 @@ struct ContentView: View {
             }
             Spacer()
         }
-        .overlay(AiolosWrapper {
-            Text("Hello, world!")
-                .padding()
-        })
+//        .overlay(AiolosWrapper {
+//            Text("Hello, world!")
+//                .padding()
+//        })
     }
 }
 

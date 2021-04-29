@@ -7,24 +7,42 @@
 
 import SwiftUI
 
-public struct AiolosWrapper<Content: View>: UIViewControllerRepresentable {
+struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerRepresentable {
 
-    public typealias UIViewControllerType = AiolosController<Content>
+    typealias UIViewControllerType = AiolosController<Content, PanelContent>
 
     var content: Content
 
-    public  init(@ViewBuilder content: () -> Content) {
-        self.content = content()
+    var panelContent: () -> PanelContent
+
+    var headerHeight: CGFloat
+
+    var isPresented: Bool
+
+    init(isPresented: Bool,
+         headerHeight: CGFloat,
+         content: Content,
+         @ViewBuilder panelContent: @escaping () -> PanelContent) {
+        self.content = content
+        self.panelContent = panelContent
+        self.isPresented = isPresented
+        self.headerHeight = headerHeight
     }
 
-    public  func makeUIViewController(context: Context) -> UIViewControllerType {
-        let controller = AiolosController<Content>()
-        controller.content = content
-        return controller
+    func makeUIViewController(context: Context) -> UIViewControllerType {
+        return AiolosController<Content, PanelContent>(rootView: content)
     }
 
-    public  func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
-        uiViewController.content = content
+    func updateUIViewController(_ controller: UIViewControllerType, context: Context) {
+        controller.rootView = content
+        if isPresented {
+            controller.panelContent = panelContent()
+        } else {
+            controller.panelContent = nil
+        }
+        controller.isPresented = isPresented
+        controller.headerHeight = headerHeight
+
     }
 
 }

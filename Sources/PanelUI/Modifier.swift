@@ -17,13 +17,11 @@ public struct PanelModifier<Body: View>: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
-        content
-            .accessibility(hidden: self.isPresented && self.state.state == .expanded)
-            .overlay(Group {
-                if isPresented {
-                    AiolosWrapper(content: body)
-                }
-            })
+        AiolosPanel(state: binding,
+                    content: content,
+                    panelContent: self.body)
+//        content
+//            .accessibility(hidden: self.isPresented && self.state.state == .expanded)
 //            .overlay(Panel(state: self.binding, content: self.body))
     }
 

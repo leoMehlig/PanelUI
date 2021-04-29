@@ -3,7 +3,7 @@ import SwiftUI
 public struct PanelHeaderHeightKey: PreferenceKey {
     public static let defaultValue: [CGFloat] = []
 
-    public static func reduce(value: inout Value, nextValue: () -> Value) {
+    public static func reduce(value: inout [CGFloat], nextValue: () -> [CGFloat]) {
         value += nextValue()
     }
 }
@@ -269,7 +269,8 @@ struct ListScrollView: View {
                     .transition(AnyTransition.opacity.animation(.default)
                         .combined(with: AnyTransition.move(edge: .bottom)))
                 ForEach(0..<1000) { _ in
-                    SlowView()
+//                    SlowView()
+                    Color.red
                 }
             }
             .padding()
