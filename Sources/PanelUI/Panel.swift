@@ -167,11 +167,13 @@ struct Panel<Content: View>: View {
     }
 
     func horizontalProgress(for offset: CGFloat, in proxy: GeometryProxy) -> CGFloat {
+        guard sizeClass == .regular else {
+            return 0
+        }
         let endWidth = self.currentPosition == .leading
             ? offset
             : proxy.size.width + offset - self.width
         let result = endWidth / (proxy.size.width - self.width)
-        print(result, endWidth, proxy.size.width, self.width, offset)
         return result
     }
 

@@ -34,7 +34,14 @@ public struct PanelState: Hashable {
 
     public var predictedPosition: Position = .center
 
-    public var isPresented: Bool = false
+    //Remove did set when using Aiolos
+    public var isPresented: Bool = false {
+        didSet {
+            if oldValue != self.isPresented {
+                self.state = .expanded
+            }
+        }
+    }
 }
 
 struct PanelStateKey: EnvironmentKey {
