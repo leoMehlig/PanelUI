@@ -21,7 +21,6 @@ extension PanelState {
     }
 }
 
-/// The RootViewController of the Demo
 class AiolosController<Content: View, PanelContent: View>: UIHostingController<Content> {
     private lazy var panelController: Aiolos.Panel = self.makePanelController()
 
@@ -112,7 +111,6 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
-        //        self.view.isUserInteractionEnabled = false
     }
 
     override func willTransition(to newCollection: UITraitCollection,
@@ -141,7 +139,6 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
         panelController.sizeDelegate = self
         panelController.resizeDelegate = self
         panelController.repositionDelegate = self
-        //        panelController.gestureDelegate = self
         panelController.contentViewController = hosting
 
         return panelController

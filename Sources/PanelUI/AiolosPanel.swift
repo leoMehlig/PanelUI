@@ -21,7 +21,7 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
     }
 
     var body: some View {
-        XAiolosWrapper(state: $state,
+        AiolosWrapper(state: $state,
                       headerHeight: headerHeight,
                       progressPublisher: progressPublisher,
                       content: content,
@@ -36,10 +36,3 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
             })
     }
 }
-
-//
-// struct SwiftUIView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SwiftUIView()
-//    }
-// }
