@@ -324,7 +324,7 @@ public struct PanelUI_Previews: PreviewProvider {
     public struct Preview: View {
         @State var isPresented = true
 
-        @State var item: Item? = Item(id: "Test")
+        @State var item: Item? = nil// Item(id: "Test")
 
         public init() {}
 

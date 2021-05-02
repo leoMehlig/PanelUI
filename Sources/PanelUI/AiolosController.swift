@@ -71,22 +71,15 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
                 .horizontalSizeClass == .regular ? .slide(direction: .horizontal) : .slide(direction: .vertical)
 
             if !state.isPresented {
-                DispatchQueue.main.async {
-                    self.panelController.removeFromParent(transition: transition, completion: {
-                        if !self.state.isPresented {
-                            self.panelContent = content
-                            self.state.state = .expanded
-                        }
-                    })
-                }
+                self.panelController.removeFromParent(transition: transition, completion: {
+                    if !self.state.isPresented {
+                        self.panelContent = content
+                        self.state.state = .expanded
+                    }
+                })
             } else {
-                DispatchQueue.main.async {
-                    self.panelContent = content
-                    self.panelController.add(to: self, transition: transition, completion: {
-//                        self.apply(state: state, content: content)
-                        self.panelController.reloadSize()
-                    })
-                }
+                self.panelContent = content
+                self.panelController.add(to: self, transition: transition, completion: nil)
             }
         }
 
@@ -119,7 +112,7 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
-//        self.view.isUserInteractionEnabled = false
+        //        self.view.isUserInteractionEnabled = false
     }
 
     override func willTransition(to newCollection: UITraitCollection,
@@ -148,22 +141,10 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
         panelController.sizeDelegate = self
         panelController.resizeDelegate = self
         panelController.repositionDelegate = self
-//        panelController.gestureDelegate = self
+        //        panelController.gestureDelegate = self
         panelController.contentViewController = hosting
 
         return panelController
-    }
-
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                           shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let contentNavigationController = self.panelController.contentViewController as? UINavigationController
-        else { return false }
-        guard let tableViewController = contentNavigationController.topViewController as? UITableViewController
-        else { return false }
-
-        // Prevent swipes on the table view being triggered as the panel is being dragged horizontally
-        // More info: https://github.com/IdeasOnCanvas/Aiolos/issues/23
-        return otherGestureRecognizer.view === tableViewController.tableView
     }
 }
 
@@ -204,21 +185,24 @@ extension AiolosController: PanelResizeDelegate {
         let header = self.panelController.size(for: .compact).height
         let progress = (size.height - header) / (full - header)
         print("Current progress", progress)
-        self.progressPublisher.send(Double(progress))
+        if progress != CGFloat(self.progressPublisher.value) {
+            self.progressPublisher.send(Double(progress))
+        }
     }
 
     func panel(_ panel: Aiolos.Panel, willTransitionFrom oldMode: Aiolos.Panel.Configuration.Mode?,
                to newMode: Aiolos.Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
         print("Panel will transition from \(String(describing: oldMode)) to \(newMode)")
-        DispatchQueue.main.async {}
-        // we can animate things along the way
-        switch newMode {
-        case .fullHeight:
-            self.state.state = .expanded
-        case .compact:
-            self.state.state = .collapsed
-        default:
-            break
+        DispatchQueue.main.async {
+            // we can animate things along the way
+            switch newMode {
+            case .fullHeight:
+                self.state.state = .expanded
+            case .compact:
+                self.state.state = .collapsed
+            default:
+                break
+            }
         }
         coordinator.animateAlongsideTransition({
             print("Animating alongside of panel transition")
@@ -262,14 +246,15 @@ extension AiolosController: PanelRepositionDelegate {
                to newPosition: Aiolos.Panel.Configuration.Position, with coordinator: PanelTransitionCoordinator) {
         print("Panel is transitioning from \(String(describing: oldPosition)) to position \(newPosition)")
 
-        DispatchQueue.main.async {}
-        switch newPosition {
-        case .bottom:
-            self.state.position = .center
-        case .leadingBottom:
-            self.state.position = .leading
-        case .trailingBottom:
-            self.state.position = .trailing
+        DispatchQueue.main.async {
+            switch newPosition {
+            case .bottom:
+                self.state.position = .center
+            case .leadingBottom:
+                self.state.position = .leading
+            case .trailingBottom:
+                self.state.position = .trailing
+            }
         }
         // we can animate things along the way
         coordinator.animateAlongsideTransition({
@@ -351,27 +336,6 @@ private extension AiolosController {
 
         return configuration
     }
-//
-//    @objc
-//    func handleToggleVisibilityPress() {
-//        let transition: Aiolos.Panel.Transition = self.traitCollection.userInterfaceIdiom == .pad ? .slide(direction: .horizontal) : .slide(direction: .vertical)
-//
-//        if self.panelController.isVisible {
-//            self.panelController.removeFromParent(transition: transition)
-//        } else {
-//            self.panelController.add(to: self, transition: transition)
-//        }
-//    }
-//
-//    @objc
-//    func handleToggleModePress() {
-//        let nextModeMapping: [Aiolos.Panel.Configuration.Mode: Aiolos.Panel.Configuration.Mode] = [ .compact: .expanded,
-//                                                                                      .expanded: .fullHeight,
-//                                                                                      .fullHeight: .compact ]
-//        guard let nextMode = nextModeMapping[self.panelController.configuration.mode] else { return }
-//
-//        self.panelController.configuration.mode = nextMode
-//    }
 }
 
 private extension UITraitCollection {

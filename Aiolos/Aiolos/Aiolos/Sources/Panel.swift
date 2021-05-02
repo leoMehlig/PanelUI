@@ -203,6 +203,9 @@ public extension Panel {
     }
 
     func reloadSize() {
+        guard !self.isMovingToParent, !self.isMovingFromParent else {
+            return
+        }
         let size = self.size(for: self.configuration.mode)
 
         self.animator.notifyDelegateOfTransition(to: size)
