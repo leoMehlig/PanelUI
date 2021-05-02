@@ -17,13 +17,19 @@ public struct PanelModifier<Body: View>: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
-//        AiolosPanel(state: self.binding,
-//                    content: content,
-//                    panelContent: self.body)
-//            .environment(\.panelState, self.binding)
+        //        AiolosPanel(state: self.binding,
+        //                    content: content,
+        //                    panelContent: self.body)
+        //            .environment(\.panelState, self.binding)
         content
             .accessibility(hidden: self.isPresented && self.state.state == .expanded)
-            .overlay(Panel(state: self.binding, content: self.body))
+            //            .overlay(Panel(state: self.binding, content: self.body))
+            .overlay(
+                AiolosPanel(state: self.binding,
+                            content: content,
+                            panelContent: self.body)
+                    .environment(\.panelState, self.binding)
+            )
     }
 
     var binding: Binding<PanelState> {

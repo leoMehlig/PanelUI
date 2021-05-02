@@ -21,7 +21,7 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
     }
 
     var body: some View {
-        AiolosWrapper(state: $state,
+        XAiolosWrapper(state: $state,
                       headerHeight: headerHeight,
                       progressPublisher: progressPublisher,
                       content: content,
