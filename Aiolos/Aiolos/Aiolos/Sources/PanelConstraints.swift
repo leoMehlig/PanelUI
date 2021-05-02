@@ -171,7 +171,9 @@ private extension PanelConstraints {
     func makeKeyboardLayoutGuide() -> KeyboardLayoutGuide {
         guard let parentView = self.panel.parent?.view else { fatalError("Must have a parent by now") }
 
-        return KeyboardLayoutGuide(parentView: parentView)
+        let guide = KeyboardLayoutGuide(parentView: parentView)
+        guide.panel = self.panel
+        return guide
     }
 
     func activateSizeConstraints(for size: CGSize) {

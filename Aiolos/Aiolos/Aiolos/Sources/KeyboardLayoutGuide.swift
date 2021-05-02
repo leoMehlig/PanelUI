@@ -11,6 +11,7 @@
 
         let topGuide: UILayoutGuide
 
+        weak var panel: Panel?
         // MARK: - Lifecycle
 
         init(parentView: UIView, notificationCenter: NotificationCenter = .default) {
@@ -76,6 +77,7 @@
             keyboardInfo.animateAlongsideKeyboard {
                 self.bottomConstraint.constant = coveredHeight
                 owningView.layoutIfNeeded()
+                self.panel?.reloadSize()
             }
         }
 
