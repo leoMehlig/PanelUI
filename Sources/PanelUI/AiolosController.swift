@@ -72,14 +72,18 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
             if !state.isPresented {
                 self.panelController.removeFromParent(transition: transition, completion: {
                     if !self.state.isPresented {
-                        self.panelContent = content
-                        self.state.state = .expanded
+                        DispatchQueue.main.async {
+                            self.panelContent = content
+                            self.state.state = .expanded
+                        }
                     }
                 })
             } else {
                 self.panelContent = content
                 self.panelController.add(to: self, transition: transition, completion: nil)
             }
+        } else {
+            self.panelContent = content
         }
 
         DispatchQueue.main.async {
