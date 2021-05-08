@@ -1,3 +1,4 @@
+#if canImport(Aiolos)
 import Combine
 import SwiftUI
 
@@ -36,3 +37,4 @@ struct AiolosPanel<Content: View, PanelContent: View>: View {
             })
     }
 }
+#endif

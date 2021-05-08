@@ -5,20 +5,18 @@ import PackageDescription
 
 let package = Package(name: "PanelUI",
                       platforms: [
-                          .iOS(.v14)
+                        .macOS(.v11), .iOS(.v14)
                       ],
                       products: [
                           .library(name: "PanelUI",
                                    targets: ["PanelUI"])
                       ],
                       dependencies: [
-                          .package(url: "https://github.com/IdeasOnCanvas/Aiolos.git", from: "1.4.0")
+                        .package(path: "Aiolos")
                       ],
                       targets: [
                           .target(name: "PanelUI",
                                   dependencies: [
-                                      "Aiolos"
-                                  ]),
-                          .testTarget(name: "PanelUITests",
-                                      dependencies: ["PanelUI"])
+                                    .product(name: "Aiolos", package: "Aiolos", condition: .when(platforms: [.iOS]))
+                                  ])
                       ])

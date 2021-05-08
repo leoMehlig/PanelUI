@@ -5,10 +5,13 @@
 //  Created by Matthias Tretter on 11/07/2017.
 //  Copyright © 2017 Matthias Tretter. All rights reserved.
 //
-import Aiolos
+#if canImport(Aiolos)
 import Combine
 import SwiftUI
-import UIKit
+
+//import UIKit
+import Aiolos
+
 
 extension PanelState {
     var mode: Aiolos.Panel.Configuration.Mode {
@@ -194,23 +197,22 @@ extension AiolosController: PanelResizeDelegate {
     func panel(_ panel: Aiolos.Panel, willTransitionFrom oldMode: Aiolos.Panel.Configuration.Mode?,
                to newMode: Aiolos.Panel.Configuration.Mode, with coordinator: PanelTransitionCoordinator) {
         print("Panel will transition from \(String(describing: oldMode)) to \(newMode)")
-        DispatchQueue.main.async {
+
+//        DispatchQueue.main.async {
             // we can animate things along the way
             switch newMode {
             case .fullHeight:
+                if self.state.state != .expanded {
                 self.state.state = .expanded
+                }
             case .compact:
-                self.state.state = .collapsed
+                if self.state.state != .collapsed {
+                    self.state.state = .collapsed
+                }
             default:
                 break
             }
-        }
-        coordinator.animateAlongsideTransition({
-            print("Animating alongside of panel transition")
-        }, completion: { _ in
-            print("Completed panel transition to \(newMode)")
-
-        })
+//        }
     }
 }
 
@@ -344,3 +346,5 @@ private extension UITraitCollection {
         UIApplication.shared.windows.contains(where: { $0.safeAreaInsets.bottom > 0 })
     }
 }
+
+#endif

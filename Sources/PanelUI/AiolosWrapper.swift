@@ -1,3 +1,4 @@
+#if canImport(Aiolos)
 import Combine
 import SwiftUI
 
@@ -41,8 +42,4 @@ struct AiolosWrapper<Content: View, PanelContent: View>: UIViewControllerReprese
     }
 }
 
-// struct AiolosWrapper_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SwiftUIView()
-//    }
-// }
+#endif

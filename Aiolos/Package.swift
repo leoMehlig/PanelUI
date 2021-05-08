@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(name: "Aiolos",
                       platforms: [
-                          .iOS(.v11)
+                        .iOS(.v11)
                       ],
                       products: [
                           .library(name: "Aiolos",
@@ -14,3 +14,4 @@ let package = Package(name: "Aiolos",
                           .target(name: "Aiolos",
                                   path: "Aiolos/Aiolos")
                       ])
+
