@@ -12,6 +12,25 @@ import SwiftUI
 //import UIKit
 import Aiolos
 
+private extension UIView {
+    func findFirstSubview<T>(ofClass viewClass: T.Type, maxDepth: Int = 10) -> T? where T: UIView {
+        var views: [UIView] = [self]
+        var depth = 0
+        while !views.isEmpty && depth <= maxDepth {
+            let currentViews = views
+            views.removeAll()
+            depth += 1
+            for view in currentViews {
+                if let typed = view as? T {
+                    return typed
+                }
+                views += view.subviews
+            }
+        }
+
+        return nil
+    }
+}
 
 extension PanelState {
     var mode: Aiolos.Panel.Configuration.Mode {
@@ -31,6 +50,9 @@ class AiolosController<Content: View, PanelContent: View>: UIHostingController<C
         didSet {
             (self.panelController.contentViewController as? UIHostingController<PanelContent?>)?.rootView = self
                 .panelContent
+            if let scrollView = self.panelController.contentViewController?.view.findFirstSubview(ofClass: UIScrollView.self) {
+                scrollView.keyboardDismissMode = .interactive
+            }
         }
     }
 

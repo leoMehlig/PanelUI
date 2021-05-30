@@ -60,7 +60,7 @@
             }
 
             let coveredHeight: CGFloat
-            if keyboardInfo.isFloatingKeyboard {
+            if keyboardInfo.isFloatingKeyboard || self.panel?.configuration.positionLogic[.bottom] == .ignoreSafeArea {
                 coveredHeight = 0.0
             } else {
                 // convert own frame to window coordinates
