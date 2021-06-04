@@ -312,10 +312,10 @@ private extension AiolosController {
 
         var panelMargins: NSDirectionalEdgeInsets {
             if traitCollection.horizontalSizeClass == .regular {
-                return NSDirectionalEdgeInsets(top: 20.0, leading: 20.0, bottom: 20.0, trailing: 20.0)
+                return NSDirectionalEdgeInsets(top: 8, leading: 20.0, bottom: 12, trailing: 20)
             }
 
-            return NSDirectionalEdgeInsets(top: 20.0, leading: 0.0, bottom: 0.0, trailing: 0.0)
+            return NSDirectionalEdgeInsets(top: 8, leading: 0.0, bottom: 0.0, trailing: 0.0)
         }
         configuration.appearance.resizeHandle = .hidden
         configuration.appearance.separatorColor = .white
