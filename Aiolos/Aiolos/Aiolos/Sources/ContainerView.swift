@@ -1,3 +1,4 @@
+#if canImport(UIKit)
 import UIKit
 
 /// Internal class that is used as a Container for the Panel
@@ -22,3 +23,4 @@ final class ContainerView: UIView {
         self.layer.maskedCorners = configuration.appearance.maskedCorners
     }
 }
+#endif
