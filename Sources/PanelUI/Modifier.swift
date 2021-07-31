@@ -18,14 +18,14 @@ public struct PanelModifier<Body: View>: ViewModifier {
 
     public func body(content: Content) -> some View {
         #if canImport(Aiolos)
-        AiolosPanel(state: self.binding,
-                    content: content,
-                    panelContent: self.body)
-            .environment(\.panelState, self.binding)
+            return AiolosPanel(state: self.binding,
+                               content: content,
+                               panelContent: self.body)
+                .environment(\.panelState, self.binding)
         #else
-        content
-            .environment(\.embeddedPanel, ($isPresented, AnyView(self.resolvedBody)))
-            .environment(\.panelState, self.binding)
+            return content
+                .environment(\.embeddedPanel, ($isPresented, AnyView(self.resolvedBody)))
+                .environment(\.panelState, self.binding)
         #endif
     }
 

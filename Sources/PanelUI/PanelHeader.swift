@@ -7,4 +7,3 @@ public struct PanelHeaderHeightKey: PreferenceKey {
         value += nextValue()
     }
 }
-

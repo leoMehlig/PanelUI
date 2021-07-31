@@ -14,7 +14,7 @@ public struct PanelState: Hashable {
         }
     }
 
-    public enum Position: Hashable {
+    public enum Position: Hashable, Equatable {
         case leading, trailing, center
     }
 
@@ -34,7 +34,7 @@ public struct PanelState: Hashable {
 
     public var predictedPosition: Position = .center
 
-    //Remove did set when using Aiolos
+    // Remove did set when using Aiolos
     public var isPresented: Bool = false {
         didSet {
             if oldValue != self.isPresented {

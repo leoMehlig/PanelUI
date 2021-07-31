@@ -4,7 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @State var isPresented = true
 
-    @State var item: Item? = nil// Item(id: "Test")
+    @State var item: Item? = nil // Item(id: "Test")
 
     public init() {}
 
@@ -177,7 +177,6 @@ struct Header: View {
         .background(Color.white)
     }
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

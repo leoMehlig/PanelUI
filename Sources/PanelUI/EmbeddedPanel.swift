@@ -3,7 +3,6 @@ import SwiftUI
 public struct EmbeddedPanel: View {
     @Environment(\.embeddedPanel) var embeeded
 
-
     @ViewBuilder
     public var body: some View {
         if embeeded.0.wrappedValue {
@@ -14,9 +13,8 @@ public struct EmbeddedPanel: View {
         }
     }
 
-    public init() { }
+    public init() {}
 }
-
 
 struct EmbeddedPanelKey: EnvironmentKey {
     static var defaultValue: (Binding<Bool>, AnyView) = (.constant(false), AnyView(EmptyView()))
